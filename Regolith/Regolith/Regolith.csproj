@@ -16,7 +16,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\..\..\KSP_DEV\GameData\UmbraSpaceIndustries\Regolith\</OutputPath>
+    <OutputPath>..\..\..\..\..\..\..\KSP_DEV\GameData\Regolith\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,9 +46,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Asteroids\USI_ModuleAsteroidProbe.cs" />
+    <Compile Include="Asteroids\USI_ModuleAsteroidInfo.cs" />
     <Compile Include="Asteroids\USI_ModuleAsteroidResource.cs" />
-    <Compile Include="Asteroids\USI_ModuleProbeData.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Scenario\BiomeResourceData.cs" />
     <Compile Include="Scenario\AddScenarioModules.cs" />
