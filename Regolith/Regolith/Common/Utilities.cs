@@ -41,5 +41,30 @@ namespace Regolith.Common
             }
             return resList;
         }
+
+        public static double GetValue(ConfigNode node, string name, double curVal)
+        {
+            double newVal;
+            if (node.HasValue(name) && double.TryParse(node.GetValue(name), out newVal))
+            {
+                return newVal;
+            }
+            else
+            {
+                return curVal;
+            }
+        }
+
+        public static double GetMaxDeltaTime()
+        {
+            //Default to one Kerbin day
+            return 21600f;
+        }
+
+        public static double GetECDeltaTime()
+        {
+            //Default to one second
+            return 1;
+        }
     }
 }

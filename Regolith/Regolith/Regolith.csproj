@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\..\KSP_DEV\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\Dropbox\KSP\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -41,15 +41,17 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\..\KSP_DEV\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\Dropbox\KSP\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Asteroids\USI_ModuleAsteroidDrill.cs" />
+    <Compile Include="Common\IAnimatedModule.cs" />
     <Compile Include="Common\USI_ModuleAnalysisResource.cs" />
     <Compile Include="Asteroids\USI_ModuleAsteroidInfo.cs" />
     <Compile Include="Asteroids\USI_ModuleAsteroidResource.cs" />
+    <Compile Include="Common\USI_ModuleAnimationGroup.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Scenario\BiomeResourceData.cs" />
     <Compile Include="Scenario\AddScenarioModules.cs" />
