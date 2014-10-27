@@ -2,18 +2,18 @@
 {
     public class DistributionData
     {
-        public double MinCrustalPresence { get; set; }
-        public double MinOceanicPresence { get; set; }
-        public double MinAtmosphericPresence { get; set; }
-        public double MaxCrustalPresence { get; set; }
-        public double MaxOceanicPresence { get; set; }
-        public double MaxAtmosphericPresence { get; set; }
+        public float MinCrustalPresence { get; set; }
+        public float MinOceanicPresence { get; set; }
+        public float MinAtmosphericPresence { get; set; }
+        public float MaxCrustalPresence { get; set; }
+        public float MaxOceanicPresence { get; set; }
+        public float MaxAtmosphericPresence { get; set; }
 
-        public double MinCrustalDensity { get; set; }
-        public double MaxCrustalDensity { get; set; }
-        public double MinOceanicDensity { get; set; }
-        public double MaxOceanicDensity { get; set; }
-        public double MinAtmosphericDensity { get; set; }
-        public double MaxAtmosphericDensity { get; set; }
+        public float MinCrustalDensity { get; set; }
+        public float MaxCrustalDensity { get; set; }
+        public float MinOceanicDensity { get; set; }
+        public float MaxOceanicDensity { get; set; }
+        public float MinAtmosphericDensity { get; set; }
+        public float MaxAtmosphericDensity { get; set; }
     }
 }

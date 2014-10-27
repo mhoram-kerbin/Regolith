@@ -18,7 +18,7 @@ namespace Regolith.Asteroids
             public int highRange;
 
             [KSPField(isPersistant = true)]
-            public double abundance = 0;
+            public float abundance = 0;
 
     }
 }

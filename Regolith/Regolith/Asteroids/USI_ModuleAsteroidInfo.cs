@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Regolith.Asteroids;
-using UnityEngine;
 using Random = System.Random;
 
-namespace DynamicTanks
+namespace Regolith.Asteroids
 {
     public class USI_ModuleAsteroidInfo : PartModule
     {
         public override void OnStart(StartState state)
         {
-            if (part.Resources.Count == 0)
+            if (part.Resources.Count <= 1) //We'll always have at least two things... Rock and something else.
             {
                 print("[REGOLITH] Setting up resources");
                 SetupAsteroidResources();
@@ -28,7 +24,7 @@ namespace DynamicTanks
         private void SetupAsteroidResources()
         {
             var r = new Random();
-            double purity = r.Next(10, 90) / 100f;
+            float purity = r.Next(10, 90) / 100f;
             var resources = new List<ResourceData>();
 
             var resInfoList = part.Modules.OfType<USI_ModuleAsteroidResource>();
@@ -52,12 +48,12 @@ namespace DynamicTanks
                 if(resources.Any(rs=>rs.Name == resInfo.resourceName))
                 {
                     var resData = resources.First(rd => rd.Name == resInfo.resourceName);
-                    double resWeight = resData.Weight / totalWeight * purity;
+                    float resWeight = resData.Weight / totalWeight * purity;
                     var resNode = new ConfigNode("RESOURCE");
                     resNode.AddValue("name", resData.Name);
                     resNode.AddValue("amount", 0.0001);
                     resNode.AddValue("maxAmount", 0);
-                    resInfo.abundance = 0.001 + resWeight;
+                    resInfo.abundance = 0.001f + resWeight;
                     print("[REGOLITH] adding " + resInfo.abundance + " " + resData.Name + " weight " + resData.Weight); 
                     part.AddResource(resNode);
                 }

@@ -46,6 +46,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Asteroids\USI_ModuleAsteroidDrill.cs" />
+    <Compile Include="Common\USI_ModuleAnalysisResource.cs" />
     <Compile Include="Asteroids\USI_ModuleAsteroidInfo.cs" />
     <Compile Include="Asteroids\USI_ModuleAsteroidResource.cs" />
     <Compile Include="Properties\Annotations.cs" />
@@ -59,6 +61,7 @@
     <Compile Include="Scenario\RegolithGameSettings.cs" />
     <Compile Include="Scenario\ResourceData.cs" />
     <Compile Include="Common\Utilities.cs" />
+    <Compile Include="Common\USI_ModuleAsteroidAnalysis.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
