@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Dropbox\KSP\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\KSP_DEV\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="KellermanSoftware.Compare-NET-Objects">
       <HintPath>..\packages\CompareNETObjects.3.01.0.0\lib\net35\KellermanSoftware.Compare-NET-Objects.dll</HintPath>
@@ -46,7 +46,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\Dropbox\KSP\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\KSP_DEV\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Choose>
@@ -64,6 +64,8 @@
   <ItemGroup>
     <Compile Include="NodeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ConversionTests.cs" />
+    <Compile Include="ResourceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Regolith\Regolith.csproj">

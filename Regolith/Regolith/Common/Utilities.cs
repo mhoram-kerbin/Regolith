@@ -57,8 +57,8 @@ namespace Regolith.Common
 
         public static double GetMaxDeltaTime()
         {
-            //Default to one Kerbin day
-            return 21600f;
+            //Default to one hour
+            return 3600;
         }
 
         public static double GetECDeltaTime()

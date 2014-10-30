@@ -51,12 +51,7 @@ namespace Regolith.Asteroids
             double deltaTime = Math.Min(Planetarium.GetUniversalTime() - lastUpdateTime, Utilities.GetMaxDeltaTime());
             lastUpdateTime += deltaTime;
 
-            ProcessExtraction(deltaTime);
-        }
 
-
-        public void ProcessExtraction(double deltaTime)
-        {
         }
 
 

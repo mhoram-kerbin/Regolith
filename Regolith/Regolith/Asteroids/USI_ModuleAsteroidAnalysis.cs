@@ -1,10 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using Regolith.Asteroids;
+﻿using System.Linq;
+using Regolith.Common;
 
-namespace Regolith.Common
+namespace Regolith.Asteroids
 {
     public class USI_ModuleAsteroidAnalysis : PartModule
     {
