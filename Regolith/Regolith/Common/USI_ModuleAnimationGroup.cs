@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using UnityEngine;
 
@@ -11,7 +12,11 @@ namespace Regolith.Common
         public string deployAnimationName = "Deploy";
 
         [KSPField]
-        public string activeAnimationName = "Operate";
+        public string activeAnimationName = "";
+
+        [KSPField]
+        public string deactivateAnimationName = "";
+
 
         [KSPField(isPersistant = true)]
         public bool isDeployed = false;
@@ -87,6 +92,15 @@ namespace Regolith.Common
             }
         }
 
+        public Animation DeactivateAnimation
+        {
+            get
+            {
+                if (deactivateAnimationName == "") return null;
+                return part.FindModelAnimators(deactivateAnimationName)[0];
+            }
+        }
+
         public override void OnStart(StartState state)
         {
             FindModules();
@@ -95,6 +109,10 @@ namespace Regolith.Common
             if (activeAnimationName != "")
             {
                 ActiveAnimation[activeAnimationName].layer = 4;
+            }
+            if (deactivateAnimationName != "")
+            {
+                DeactivateAnimation[deactivateAnimationName].layer = 4;
             }
             Setup();
         }
@@ -148,6 +166,7 @@ namespace Regolith.Common
             {
                 SetRetractedState(-1000);
             }
+            ToggleEmmitters(false);
         }
         private void FindModules()
         {
@@ -164,18 +183,43 @@ namespace Regolith.Common
         {
             if ((_Modules.Any(e => e.ModuleIsActive() || alwaysActive) && isDeployed))
             {
-                if (!ActiveAnimation.isPlaying)
+                ToggleActiveState(1, true);
+            }
+            else
+            {
+                ToggleActiveState(-1,false);
+            }
+        }
+
+        private void ToggleActiveState(int speed, bool state)
+        {
+            try
+            {
+                if (!ActiveAnimation.isPlaying && state == true && activeAnimationName != "")
                 {
-                    ActiveAnimation[activeAnimationName].speed = 1;
+                    ActiveAnimation[activeAnimationName].speed = speed;
                     ActiveAnimation.Play(activeAnimationName);
-                    //Enable our particle effects
-                    var eList = part.GetComponentsInChildren<KSPParticleEmitter>();
-                    foreach (var e in eList)
-                    {
-                        e.emit = true;
-                        e.enabled = true;
-                    }
                 }
+                if (!DeactivateAnimation.isPlaying && state == false && deactivateAnimationName != "")
+                {
+                    DeactivateAnimation[deactivateAnimationName].speed = speed;
+                    DeactivateAnimation.Play(deactivateAnimationName);
+                }
+                ToggleEmmitters(state);
+            }
+            catch (Exception)
+            {
+                print("[REGOLITH] ERROR in ToggleActiveState of Regolith_ModuleAnimationGroup");
+            }
+        }
+
+        private void ToggleEmmitters(bool state)
+        {
+            var eList = part.GetComponentsInChildren<KSPParticleEmitter>();
+            foreach (var e in eList)
+            {
+                e.emit = state;
+                e.enabled = state;
             }
         }
 
@@ -206,7 +250,10 @@ namespace Regolith.Common
                 {
                     ActiveAnimation.Stop(activeAnimationName);
                 }
-
+                if (deactivateAnimationName != "")
+                {
+                    DeactivateAnimation.Stop(deactivateAnimationName);
+                }
                 DeployAnimation[deployAnimationName].time = DeployAnimation[deployAnimationName].length;
             }
             DeployAnimation[deployAnimationName].speed = speed;

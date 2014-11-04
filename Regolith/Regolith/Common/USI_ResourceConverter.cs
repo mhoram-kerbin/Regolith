@@ -7,15 +7,18 @@ namespace Regolith.Common
 {
     public class USI_ResourceConverter
     {
-        private ConversionRecipe _recipe;
-        public USI_ResourceConverter(ConversionRecipe recipe)
+        private IResourceBroker _broker;
+        public USI_ResourceConverter(IResourceBroker broker)
         {
-            _recipe = recipe;
+            _broker = broker;
         }
+
+        public USI_ResourceConverter() : this(new ResourceBroker())
+        { }
+
 
         public void ProcessRecipe(double deltaTime)
         {
-
         }
     }
 }
