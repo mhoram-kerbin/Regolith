@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Regolith.Annotations;
 using Regolith.Common;
 using UnityEngine;
 
@@ -62,7 +63,7 @@ namespace Regolith.Asteroids
         }
 
         private double lastUpdateTime = 0.0f;
-        private ResourceConverter converter = new ResourceConverter();
+        private USI_ResourceConverter converter = new USI_ResourceConverter();
 
         public override void OnFixedUpdate()
         {

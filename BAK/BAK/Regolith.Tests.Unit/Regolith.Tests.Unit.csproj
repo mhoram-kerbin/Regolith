@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AE797189-E2C6-4029-8C5C-330F950E9784}</ProjectGuid>
+    <ProjectGuid>{2F62ACEF-44AB-45FC-972F-CF0F0E3A45BA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Regolith.Tests.Unit</RootNamespace>
@@ -39,7 +39,7 @@
       <HintPath>..\..\..\..\..\..\..\KSP_DEV\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="KellermanSoftware.Compare-NET-Objects">
-      <HintPath>..\..\Lib\CompareObjects\net35\KellermanSoftware.Compare-NET-Objects.dll</HintPath>
+      <HintPath>..\packages\CompareNETObjects.3.01.0.0\lib\net35\KellermanSoftware.Compare-NET-Objects.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -62,14 +62,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ConversionTests.cs" />
     <Compile Include="NodeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ConversionTests.cs" />
     <Compile Include="ResourceTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Regolith\Regolith.csproj">
-      <Project>{9d38f734-3227-4af5-b5a2-174ba2bce202}</Project>
+      <Project>{398708c9-829c-4c77-904e-4045adc897f1}</Project>
       <Name>Regolith</Name>
     </ProjectReference>
   </ItemGroup>

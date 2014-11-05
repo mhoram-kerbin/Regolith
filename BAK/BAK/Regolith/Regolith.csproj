@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9D38F734-3227-4AF5-B5A2-174BA2BCE202}</ProjectGuid>
+    <ProjectGuid>{398708C9-829C-4C77-904E-4045ADC897F1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Regolith</RootNamespace>
@@ -13,10 +13,10 @@
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\..\..\..\..\KSP_DEV\GameData\Regolith\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\..\KSP_DEV\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -41,31 +42,36 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\..\..\KSP_DEV\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Scenario\AddScenarioModules.cs" />
-    <Compile Include="Scenario\BiomeResourceData.cs" />
+    <Compile Include="Asteroids\USI_ModuleAsteroidDrill.cs" />
     <Compile Include="Common\ConversionRecipe.cs" />
-    <Compile Include="Scenario\DistributionData.cs" />
-    <Compile Include="Scenario\GlobalConfig.cs" />
     <Compile Include="Common\IAnimatedModule.cs" />
     <Compile Include="Common\IResourceBroker.cs" />
-    <Compile Include="Scenario\PlanetaryResourceData.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenario\RegolithGameSettings.cs" />
-    <Compile Include="Scenario\RegolithScenario.cs" />
     <Compile Include="Common\ResourceBroker.cs" />
-    <Compile Include="Scenario\ResourceData.cs" />
     <Compile Include="Common\ResourceRatio.cs" />
-    <Compile Include="Common\USI_ModuleaNALYSISResource.cs" />
-    <Compile Include="Common\USI_ModuleAnimationGroup.cs" />
-    <Compile Include="Asteroids\USI_ModuleAsteroidAnalysis.cs" />
-    <Compile Include="Asteroids\USI_ModuleAsteroidDrill.cs" />
+    <Compile Include="Common\USI_ModuleAnalysisResource.cs" />
     <Compile Include="Asteroids\USI_ModuleAsteroidInfo.cs" />
     <Compile Include="Asteroids\USI_ModuleAsteroidResource.cs" />
-    <Compile Include="Common\ResourceConverter.cs" />
+    <Compile Include="Common\USI_ModuleAnimationGroup.cs" />
+    <Compile Include="Common\USI_ResourceConverter.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Scenario\BiomeResourceData.cs" />
+    <Compile Include="Scenario\AddScenarioModules.cs" />
+    <Compile Include="Scenario\DistributionData.cs" />
+    <Compile Include="Scenario\GlobalConfig.cs" />
+    <Compile Include="Scenario\PlanetaryResourceData.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenario\RegolithScenario.cs" />
+    <Compile Include="Scenario\RegolithGameSettings.cs" />
+    <Compile Include="Scenario\ResourceData.cs" />
     <Compile Include="Common\Utilities.cs" />
+    <Compile Include="Asteroids\USI_ModuleAsteroidAnalysis.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

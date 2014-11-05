@@ -15,7 +15,7 @@ namespace Regolith.Tests.Unit
         [TestMethod]
         public void Should_be_able_to_establish_a_converter()
         {
-            var conv = new ResourceConverter(null);
+            var conv = new USI_ResourceConverter(null);
             Assert.IsNotNull(conv);
         }
 
@@ -23,7 +23,7 @@ namespace Regolith.Tests.Unit
         public void Converters_Require_a_broker()
         {
             var broker = new FakeResourceBroker();
-            var c = new ResourceConverter(broker);
+            var c = new USI_ResourceConverter(broker);
             Assert.IsNotNull(c);
         }
 
@@ -54,7 +54,7 @@ namespace Regolith.Tests.Unit
         {
             var recipe = GetSimpleRecipe();
             var results = GetSimpleOutput();
-            var conv = new ResourceConverter(new FakeResourceBroker());
+            var conv = new USI_ResourceConverter(new FakeResourceBroker());
             //We'll start with a delta time of 1 second - the default.
             var actual = conv.ProcessRecipe(1,recipe, null);
             var result = comp.Compare(results, actual);
@@ -66,7 +66,7 @@ namespace Regolith.Tests.Unit
         {
             var recipe = GetComplexRecipe();
             var results = GetComplexOutput();
-            var conv = new ResourceConverter(new FakeResourceBroker());
+            var conv = new USI_ResourceConverter(new FakeResourceBroker());
             //We'll start with a delta time of 1 second - the default.
             var actual = conv.ProcessRecipe(1, recipe, null);
             var result = comp.Compare(results, actual);
@@ -78,11 +78,12 @@ namespace Regolith.Tests.Unit
         {
             var recipe = GetComplexRecipe();
             var results = GetComplexOutputWithDelta();
-            var conv = new ResourceConverter(new FakeResourceBroker());
+            var conv = new USI_ResourceConverter(new FakeResourceBroker());
             var actual = conv.ProcessRecipe(0.5, recipe, null);
             var result = comp.Compare(results, actual);
             Assert.IsTrue(result.AreEqual);
         }
+
 
 
         private ConversionRecipe GetSimpleRecipe()
@@ -118,9 +119,6 @@ namespace Regolith.Tests.Unit
         private List<ResourceRatio> GetComplexOutputWithDelta()
         {
             var results = new List<ResourceRatio>();
-            results.Add(new ResourceRatio { ResourceName = "Hydrogen", Ratio = -1 });
-            results.Add(new ResourceRatio { ResourceName = "Oxygen", Ratio = -1 });
-            results.Add(new ResourceRatio { ResourceName = "ElectricCharge", Ratio = -5 });
             results.Add(new ResourceRatio { ResourceName = "LiquidFuel", Ratio = 0.45f });
             results.Add(new ResourceRatio { ResourceName = "Oxidizer", Ratio = 0.55f });
             return results;
@@ -129,8 +127,8 @@ namespace Regolith.Tests.Unit
         private List<ResourceRatio> GetSimpleOutput()
         {
             var results = new List<ResourceRatio>();
-            results.Add(new ResourceRatio { ResourceName = "Ore", Ratio = -1 });
-            results.Add(new ResourceRatio { ResourceName = "Metal", Ratio = 1 });
+            results.Add(new ResourceRatio { ResourceName = "Ore", Ratio = 1 });
+            results.Add(new ResourceRatio { ResourceName = "Metal", Ratio = -1 });
             return results;
         }
     }
