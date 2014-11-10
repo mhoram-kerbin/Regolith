@@ -30,16 +30,12 @@ namespace Regolith.Asteroids
                         _potato = potatoes.FirstOrDefault();
                         var resTotal = 0f;
                         var resources = _potato.FindModulesImplementing<USI_ModuleAsteroidResource>();
-                        print("[REGOLITH] Found " + resources.Count + " resources");
                         foreach (var res in resources)
                         {
-                            print("[REGOLITH] matching " + res.resourceName);
-
                             var analysis =
                                 part.FindModulesImplementing<USI_ModuleAnalysisResource>().FirstOrDefault(r => r.resourceName == res.resourceName);
                             if (analysis != null)
                             {
-                                print("[REGOLITH] found with abundance of " + res.abundance);
                                 analysis.abundance = res.abundance;
                                 resTotal += analysis.abundance;
                             }

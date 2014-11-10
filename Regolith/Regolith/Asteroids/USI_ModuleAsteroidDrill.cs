@@ -26,7 +26,7 @@ namespace Regolith.Asteroids
         public double ExtractionRate;
 
         [KSPField(isPersistant = false)]
-        public double Efficiency;
+        public double Efficiency = .1;
 
         [KSPField(isPersistant = false)]
         public double DumpExcess;
@@ -67,12 +67,10 @@ namespace Regolith.Asteroids
         public override void OnFixedUpdate()
         {
             //Check our time
-            print("[REGOLITH] Checking Time");
             var deltaTime = GetDeltaTime();
                 if (deltaTime < 0) return;
 
             //Determine if we are in fact latched to an asteroid
-            print("[REGOLITH] Checking Asteroid");
             var potato = GetAttachedPotato();
             if (potato == null)
             {
@@ -81,44 +79,93 @@ namespace Regolith.Asteroids
                 return;
             }
 
+            if (!potato.Modules.Contains("USI_ModuleAsteroidResource"))
+            {
+                status = "No resource data";
+                IsActivated = false;
+                return;
+            }
+            var resourceList = potato.FindModulesImplementing<USI_ModuleAsteroidResource>();
 
-            if (!CheckForImpact(new Vector3(1, 0, 0)))
+            if (!CheckForImpact())
             {
                 status = "No surface impact";
                 IsActivated = false;
                 return;               
             }
+
+            var info = potato.FindModuleImplementing<USI_ModuleAsteroidInfo>();
+            if (info == null)
+            {
+                status = "No info";
+                IsActivated = false;
+                return;
+            }
+
+            if (info.massThreshold >= potato.mass)
+            {
+                status = "Resources Depleted";
+                IsActivated = false;
+                return;
+            }
+
             //Handle state change
             UpdateDrillingStatus();
-            //If we're enabled:
+            //If we're enabled"
             if (IsActivated)
             {
-                print("[REGOLITH] Drilling!");
-                //Determine our input
-                //Do we have enough input?
-                //Determine our output - let's start with rock.
-                //Do we have enough SPACE for output?
-                //Remove the inputs
-                //Add the outputs
+                //Fetch our recipe
+                var recipe = new ConversionRecipe();
+                recipe.Inputs.Add(new ResourceRatio {ResourceName = "ElectricCharge", Ratio = 1});
+                
+                //Setup rock
+                var purity = resourceList.Sum(ar => ar.abundance);
+                var rockAmt = 1 - purity;
+                resourceList.Add(new USI_ModuleAsteroidResource {abundance = rockAmt, resourceName = "Rock"});
+
+                foreach (var ar in resourceList)
+                {
+                    purity += ar.abundance;
+                    if (ar.abundance > Utilities.FLOAT_TOLERANCE)
+                    {
+                        var res = potato.Resources[ar.resourceName];
+                        var resInfo = PartResourceLibrary.Instance.GetDefinition(res.resourceName);
+                        var outRes = new ResourceRatio {ResourceName = ar.resourceName, Ratio = ar.abundance * Efficiency};
+                        //Make sure we have enough free space
+                        var spaceNeeded = deltaTime*ar.abundance*Efficiency;
+                        var spaceAvailable = res.maxAmount - res.amount;
+                        if (spaceAvailable < spaceNeeded)
+                        {
+                            var slackMass = potato.mass - info.massThreshold;
+                            var maxSpace = slackMass/resInfo.density; 
+                            var unitsToAdd = Math.Min(maxSpace, (spaceNeeded - spaceAvailable));
+                            var newMass = potato.mass - ((float)(resInfo.density * unitsToAdd));
+                            res.maxAmount += unitsToAdd;
+                            potato.mass = newMass;
+                            
+                        }
+                        recipe.Outputs.Add(outRes);
+                    }
+                }
+                //Process the recipe
+                converter.ProcessRecipe(deltaTime, recipe, part);
+
             }
         }
 
 
-        private bool CheckForImpact(Vector3 v)
+        private bool CheckForImpact()
         {
             var t = part.FindModelTransform(ImpactTransform);
             var targetType = "PotatoRoid";
             var pos = t.position;
             RaycastHit hitInfo;
-            var ray = new Ray(pos, v);
+            var ray = new Ray(pos, t.forward);
             Physics.Raycast(ray, out hitInfo, 5f);
             if (hitInfo.collider != null)
             {
-                print(String.Format("Vector {0},{1},{2}", v.x,v.y,v.z));
-                print(hitInfo.collider.gameObject.name);
                 var colType =   hitInfo.collider.attachedRigidbody.gameObject.name;
-                print(hitInfo.collider.attachedRigidbody.gameObject.name);
-                return (targetType == colType);
+                return (colType.StartsWith(targetType));
             }
             return false;
         }

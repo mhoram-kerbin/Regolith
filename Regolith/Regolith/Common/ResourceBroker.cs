@@ -8,12 +8,6 @@ namespace Regolith.Common
 {}
     public class ResourceBroker : IResourceBroker
     {
-        //For our first implementation, we just care about transfer mode - i.e. the converters are greedy,
-        //They will try to work with the current part, and if that fails, will switch to an even distribution of the remainder
-        //for all parts.
-
-        public const double FLOAT_TOLERANCE = 0.000000001d; 
-
         public virtual double AmountAvailable(Part part, string resName)
         {
             var res = PartResourceLibrary.Instance.GetDefinition(resName);
@@ -44,7 +38,7 @@ namespace Regolith.Common
                     r.amount = 0;
                 }
 
-                if (Math.Abs(demandLeft) < FLOAT_TOLERANCE) continue;
+                if (Math.Abs(demandLeft) < Utilities.FLOAT_TOLERANCE) continue;
             }
             
             //This should generally be demand unless weird stuff happened.
@@ -82,7 +76,7 @@ namespace Regolith.Common
                     r.amount += spaceAvailable;
                 }
 
-                if (Math.Abs(stuffLeft) < FLOAT_TOLERANCE) continue;
+                if (Math.Abs(stuffLeft) < Utilities.FLOAT_TOLERANCE) continue;
             }
             
             //This should generally be demand unless weird stuff happened.

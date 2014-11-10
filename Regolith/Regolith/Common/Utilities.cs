@@ -6,6 +6,8 @@ namespace Regolith.Common
 {
     public static class Utilities
     {
+        public const double FLOAT_TOLERANCE = 0.000000001d;
+
         public static T LoadNodeProperties<T>(ConfigNode node)
             where T : new()
         {
@@ -63,8 +65,8 @@ namespace Regolith.Common
 
         public static double GetECDeltaTime()
         {
-            //Default to one second
-            return 1;
+            //Default to 30 seconds
+            return 30;
         }
     }
 }

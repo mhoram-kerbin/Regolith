@@ -18,43 +18,59 @@ namespace Regolith.Common
         { }
 
 
-        public List<ResourceRatio> ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part part)
+        public List<ResourceRatio> ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part resPart)
         {
             //How recipes work:
             var results = new List<ResourceRatio>();
 
             //We test for availability of all inputs
-            var ratio = deltaTime;
-            foreach (var r in recipe.Inputs)
+            var timeFactor = deltaTime;
+            foreach (var r in recipe.Inputs.Where(r=>r.ResourceName != "ElectricCharge"))
             {
-                var avail = _broker.AmountAvailable(part, r.ResourceName);
-                if (avail < r.Ratio * ratio)
+                var avail = _broker.AmountAvailable(resPart, r.ResourceName);
+                if (avail < r.Ratio * timeFactor)
                 {
-                    ratio = ratio*(avail/(r.Ratio*ratio));
+                    timeFactor = timeFactor * (avail / (r.Ratio * timeFactor));
                 }
             }
+            //EC is a separate case
+            if (recipe.Inputs.Any(r => r.ResourceName == "ElectricCharge"))
+            {
+                var ecRes = recipe.Inputs.First(r => r.ResourceName == "ElectricCharge");
+                var avail = _broker.AmountAvailable(resPart, ecRes.ResourceName);
+                if (avail < Math.Min(ecRes.Ratio * timeFactor, Utilities.GetECDeltaTime()))
+                {
+                    timeFactor = timeFactor*Math.Min(ecRes.Ratio*timeFactor, Utilities.GetECDeltaTime());
+                }
+            }
+
+
             //test for space of all outputs
             foreach (var r in recipe.Outputs)
             {
-                var space = _broker.StorageAvailable(part, r.ResourceName);
-                if (space < r.Ratio * ratio)
+                var space = _broker.StorageAvailable(resPart, r.ResourceName);
+                if (space < r.Ratio * timeFactor)
                 {
-                    ratio = ratio * (space / (r.Ratio * ratio));
+                    timeFactor = timeFactor * (space / (r.Ratio * timeFactor));
                 }
             }
 
 
             //Pull inputs
-            foreach (var r in recipe.Inputs)
+            foreach (var res in recipe.Inputs)
             {
-                var result = new ResourceRatio {Ratio = r.Ratio*ratio*-1, ResourceName = r.ResourceName};
-                results.Add(result);
+                var input = 
+                    res.ResourceName == "ElectricCharge" 
+                    ? _broker.RequestResource(resPart, res.ResourceName, res.Ratio * Math.Min(timeFactor, Utilities.GetECDeltaTime())) 
+                    : _broker.RequestResource(resPart, res.ResourceName, res.Ratio * timeFactor);
+                results.Add(new ResourceRatio {Ratio = input * -1, ResourceName = res.ResourceName});
             }
-            //Pull outputs
-            foreach (var r in recipe.Outputs)
+            
+            //Store outputs
+            foreach (var res in recipe.Outputs)
             {
-                var result = new ResourceRatio {Ratio = r.Ratio*ratio, ResourceName = r.ResourceName};
-                results.Add(result);
+                var output = _broker.StoreResource(resPart, res.ResourceName, res.Ratio * timeFactor);
+                results.Add(new ResourceRatio { Ratio = output, ResourceName = res.ResourceName });
             }
 
             return results;

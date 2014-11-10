@@ -1,17 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Regolith.Common;
 using Random = System.Random;
 
 namespace Regolith.Asteroids
 {
     public class USI_ModuleAsteroidInfo : PartModule
     {
+        [KSPField(isPersistant = true)] 
+        public float massThreshold = 0f;
+
         public override void OnStart(StartState state)
         {
             if (part.Resources.Count <= 1) //We'll always have at least two things... Rock and something else.
             {
-                print("[REGOLITH] Setting up resources");
                 SetupAsteroidResources();
+            }
+            if (massThreshold <= Utilities.FLOAT_TOLERANCE)
+            {
+                massThreshold = part.mass*.25f; //75% of an asteroid's mass can be converted
             }
         }
 
@@ -37,7 +44,6 @@ namespace Regolith.Asteroids
                     res.Name = resInfo.resourceName;
                     res.Weight = r.Next(resInfo.lowRange, resInfo.highRange);
                     resources.Add(res);
-                    print("[REGOLITH] found " + res.Weight + " " + res.Name );
                 }
             }
 
@@ -54,7 +60,6 @@ namespace Regolith.Asteroids
                     resNode.AddValue("amount", 0.0001);
                     resNode.AddValue("maxAmount", 0);
                     resInfo.abundance = 0.001f + resWeight;
-                    print("[REGOLITH] adding " + resInfo.abundance + " " + resData.Name + " weight " + resData.Weight); 
                     part.AddResource(resNode);
                 }
             }
