@@ -45,8 +45,8 @@ namespace Regolith.Common
             }
 
 
-            //test for space of all outputs
-            foreach (var r in recipe.Outputs)
+            //test for space of all outputs.  Ignore ones where it's ok to dump them
+            foreach (var r in recipe.Outputs.Where(ro=>!ro.DumpExcess))
             {
                 var space = _broker.StorageAvailable(resPart, r.ResourceName);
                 if (space < r.Ratio * timeFactor)
@@ -69,6 +69,7 @@ namespace Regolith.Common
             //Store outputs
             foreach (var res in recipe.Outputs)
             {
+
                 var output = _broker.StoreResource(resPart, res.ResourceName, res.Ratio * timeFactor);
                 results.Add(new ResourceRatio { Ratio = output, ResourceName = res.ResourceName });
             }

@@ -4,5 +4,6 @@ namespace Regolith.Common
     {
         public string ResourceName { get; set; }
         public double Ratio { get; set; }
+        public bool DumpExcess { get; set; }
     }
 }

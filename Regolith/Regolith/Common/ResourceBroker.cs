@@ -23,6 +23,25 @@ namespace Regolith.Common
             part.GetConnectedResources(res.id, res.resourceFlowMode, resList);
             var demandLeft = resAmount;
             var amountTaken = 0d;
+
+            //If we are dealing with a fuel mode that wants even distribution
+            if (res.resourceFlowMode == ResourceFlowMode.ALL_VESSEL
+                || res.resourceFlowMode == ResourceFlowMode.STAGE_PRIORITY_FLOW)
+            {
+                //First pass.
+                var avgAmount = resAmount / resList.Count();
+                foreach (var r in resList)
+                {
+                    if (r.amount >= avgAmount)
+                    {
+                        amountTaken += avgAmount;
+                        r.amount -= avgAmount;
+                        demandLeft -= avgAmount;
+                    }
+                }
+            }
+
+            //Second pass - store first come first served            
             foreach (var r in resList)
             {
                 if (r.amount >= demandLeft)
@@ -60,6 +79,26 @@ namespace Regolith.Common
             part.GetConnectedResources(res.id, res.resourceFlowMode, resList);
             var stuffLeft = resAmount;
             var amountStored = 0d;
+
+            //If we are dealing with a fuel mode that wants even distribution
+            if (res.resourceFlowMode == ResourceFlowMode.ALL_VESSEL
+                || res.resourceFlowMode == ResourceFlowMode.STAGE_PRIORITY_FLOW)
+            {
+                //First pass.
+                var avgAmount = resAmount/resList.Count();
+                foreach (var r in resList)
+                {
+                    var spaceAvailable = r.maxAmount - r.amount;
+                    if (spaceAvailable >= avgAmount)
+                    {
+                        amountStored += avgAmount;
+                        r.amount += avgAmount;
+                        stuffLeft -= avgAmount;
+                    }
+                }
+            }
+
+            //Second pass - store first come first served
             foreach (var r in resList)
             {
                 var spaceAvailable = r.maxAmount - r.amount;
