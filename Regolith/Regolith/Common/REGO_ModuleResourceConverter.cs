@@ -35,6 +35,7 @@ namespace Regolith.Common
                 var outputs = RecipeOutputs.Split(',');
                 for (int ip = 0; ip < inputs.Count(); ip += 2)
                 {
+                    print(String.Format("[REGOLITH] - INPUT {0} {1}", inputs[ip], inputs[ip + 1]));
                     r.Inputs.Add(new ResourceRatio
                                  {
                                      ResourceName = inputs[ip].Trim(),
@@ -43,6 +44,7 @@ namespace Regolith.Common
                 }
                 for (int op = 0; op < outputs.Count(); op += 3)
                 {
+                    print(String.Format("[REGOLITH] - OUTPUTS {0} {1} {2}", outputs[op], outputs[op + 1], outputs[op+2]));
                     r.Outputs.Add(new ResourceRatio
                     {
                         ResourceName = outputs[op].Trim(),

@@ -40,7 +40,7 @@ namespace Regolith.Common
                 var avail = _broker.AmountAvailable(resPart, ecRes.ResourceName);
                 if (avail < Math.Min(ecRes.Ratio * timeFactor, Utilities.GetECDeltaTime()))
                 {
-                    timeFactor = timeFactor*Math.Min(ecRes.Ratio*timeFactor, Utilities.GetECDeltaTime());
+                    timeFactor = timeFactor*Math.Min((avail / (ecRes.Ratio*timeFactor)), Utilities.GetECDeltaTime());
                 }
             }
 
