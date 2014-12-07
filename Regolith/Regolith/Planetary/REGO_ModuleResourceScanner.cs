@@ -19,7 +19,7 @@ namespace Regolith.Planetary
         public int ScannerType = 0;
 
         [KSPField]
-        public float maxAbundanceAltitude = 500000000f;
+        public float MaxAbundanceAltitude = 500000000f;
 
         public override void OnStart(StartState state)
         {
@@ -60,7 +60,7 @@ namespace Regolith.Planetary
 
         private void CheckAbundanceDisplay()
         {
-            if (Utilities.GetAltitude(vessel) > maxAbundanceAltitude && !vessel.Landed && ScannerType == 0)
+            if (Utilities.GetAltitude(vessel) > MaxAbundanceAltitude && !vessel.Landed && ScannerType == 0)
             {
                 abundanceDisplay = "Too high";
             }

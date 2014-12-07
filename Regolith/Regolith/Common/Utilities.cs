@@ -1,12 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using Regolith.Scenario;
+using UnityEngine;
 
 namespace Regolith.Common
 {
     public static class Utilities
     {
         public const double FLOAT_TOLERANCE = 0.000000001d;
+
+        public static Vector2 LatLonToCart(double lat, double lon, int precision = 10)
+        {
+            var x = (float)Math.Round(lon * Math.Cos(lat), precision);
+            var y = (float)Math.Round(lat, precision);
+            var cart = new Vector2(x, y);
+            return cart;
+        }
 
         public static T LoadNodeProperties<T>(ConfigNode node)
             where T : new()

@@ -9,7 +9,7 @@ using Random = System.Random;
 
 namespace Regolith.Common
 {
-    public abstract class RegolithResourceMap : MonoBehaviour
+    public class RegolithResourceMap : MonoBehaviour
     {
         private static List<ResourceData> _globalResources;
         private static List<ResourceData> _planetaryResources;
@@ -27,12 +27,12 @@ namespace Regolith.Common
         {
             get { return _planetaryResources ?? (_planetaryResources = LoadResourceInfo("REGOLITH_PLANETARY_RESOURCE")); }
         }
-        protected static List<ResourceData> LoadResourceInfo(string node)
+        private static List<ResourceData> LoadResourceInfo(string node)
         {
             var resList = GameDatabase.Instance.GetConfigNodes(node);
             return Utilities.ImportConfigNodeList(resList);
         }
-        protected static DistributionData GetBestResourceData(List<ResourceData> configs)
+        private static DistributionData GetBestResourceData(List<ResourceData> configs)
         {
             try
             {
@@ -80,8 +80,9 @@ namespace Regolith.Common
         {
             try
             {
+                var cart = Utilities.LatLonToCart(lat, lon);
                 var body = FlightGlobals.Bodies[bodyId];
-                var biome = body.BiomeMap.GetAtt(lat, lon);
+                var biome = body.BiomeMap.GetAtt(cart.x,cart.y);
                 var seed = RegolithScenario.Instance.gameSettings.seed;
                 DistributionData distro = null;
                 seed *= (bodyId + 1);
@@ -133,8 +134,8 @@ namespace Regolith.Common
                     noiseSeed[ns] = rand.Next();
                 }
                 var spx = new SimplexNoiseGenerator(noiseSeed);
-                var noiseX = (float) lat;
-                var noiseY = (float) lon;
+                var noiseX = (float) cart.x;
+                var noiseY = (float) cart.y;
                 var noiseZ = (float) rand.Next(100) / 100f;
                 //print("[REGO] NX: " + noiseX);
                 //print("[REGO] NY: " + noiseY);
@@ -190,6 +191,14 @@ namespace Regolith.Common
                 print("[REGO] - Error in - RegolithResourceMap_GetAbundance - " + e.Message);
                 return 0f;
             }
+        }
+
+        public static Vector2 GetDepletionNode(double lat, double lon)
+        {
+            //For precision, we'll be rounding.
+            //This gives us 65K potential drill sites.
+            var cart = Utilities.LatLonToCart(lat, lon, 0);
+            return cart;
         }
     }
 }
