@@ -19,6 +19,9 @@ namespace Regolith.Asteroids
         [KSPField(isPersistant = false)]
         public string StopActionName;
 
+        [KSPField(isPersistant = false)]
+        public string ConverterName = "";
+
         [KSPField(guiActive = true, guiName = "", guiActiveEditor = false)]
         public string status = "Unknown";
 
@@ -46,7 +49,7 @@ namespace Regolith.Asteroids
             StartResourceConverter();
         }
 
-        protected double lastUpdateTime = 0.0f;
+        protected double lastUpdateTime;
         protected IResourceBroker _broker;
         protected ResourceConverter _converter;
 
@@ -75,21 +78,29 @@ namespace Regolith.Asteroids
 
         protected double GetDeltaTime()
         {
-            if (Time.timeSinceLevelLoad < 1.0f || !FlightGlobals.ready)
+            try
             {
-                return -1;
-            }
+                if (Time.timeSinceLevelLoad < 1.0f || !FlightGlobals.ready)
+                {
+                    return -1;
+                }
 
-            if (Math.Abs(lastUpdateTime) < Utilities.FLOAT_TOLERANCE)
+                if (Math.Abs(lastUpdateTime) < Utilities.FLOAT_TOLERANCE)
+                {
+                    // Just started running
+                    lastUpdateTime = Planetarium.GetUniversalTime();
+                    return -1;
+                }
+
+                var deltaTime = Math.Min(Planetarium.GetUniversalTime() - lastUpdateTime, Utilities.GetMaxDeltaTime());
+                lastUpdateTime += deltaTime;
+                return deltaTime;
+            }
+            catch (Exception e)
             {
-                // Just started running
-                lastUpdateTime = Planetarium.GetUniversalTime();
-                return -1;
+                print("[REGO] - Error in - BaseConverter_GetDeltaTime - " + e.Message);
+                return 0;
             }
-
-            var deltaTime = Math.Min(Planetarium.GetUniversalTime() - lastUpdateTime, Utilities.GetMaxDeltaTime());
-            lastUpdateTime += deltaTime;
-            return deltaTime;
         }
 
         protected void UpdateConverterStatus()
@@ -101,18 +112,26 @@ namespace Regolith.Asteroids
 
         public override void OnLoad(ConfigNode node)
         {
-            base.OnLoad(node);
-            lastUpdateTime = Utilities.GetValue(node, "lastUpdateTime", lastUpdateTime);
-            part.force_activate();
+            try
+            {
+                base.OnLoad(node);
+                lastUpdateTime = Utilities.GetValue(node, "lastUpdateTime", lastUpdateTime);
+                part.force_activate();
 
-            Events["StartResourceConverter"].guiName = StartActionName;
-            Events["StopResourceConverter"].guiName = StopActionName;
-            Actions["StartResourceConverterAction"].guiName = StartActionName;
-            Actions["StopResourceConverterAction"].guiName = StopActionName;
+                Events["StartResourceConverter"].guiName = StartActionName;
+                Events["StopResourceConverter"].guiName = StopActionName;
+                Actions["StartResourceConverterAction"].guiName = StartActionName;
+                Actions["StopResourceConverterAction"].guiName = StopActionName;
+                Fields["status"].guiName = ConverterName;
 
-            //Check for presence of an Animation Group.  If not present, enable the module.
-            if (!part.Modules.Contains("USI_ModuleAnimationGroup"))
-                EnableModule();
+                //Check for presence of an Animation Group.  If not present, enable the module.
+                if (!part.Modules.Contains("USI_ModuleAnimationGroup"))
+                    EnableModule();
+            }
+            catch (Exception e)
+            {
+                print("[REGO] - Error in - BaseConverter_OnLoad - " + e.Message); 
+            }
         }
 
         public override void OnSave(ConfigNode node)
@@ -123,17 +142,30 @@ namespace Regolith.Asteroids
 
         public override void OnFixedUpdate()
         {
-            //Check our time
-            var deltaTime = GetDeltaTime();
-            if (deltaTime < 0) return;
+            try
+            {
+                //Check our time
+                var deltaTime = GetDeltaTime();
+                if (deltaTime < 0) return;
 
-            var recipe = PrepareRecipe(deltaTime);
-
-
-            if (recipe != null)
-                _converter.ProcessRecipe(deltaTime, recipe, part);
+                var recipe = PrepareRecipe(deltaTime);
 
 
+                if (recipe != null)
+                {
+                    var result = _converter.ProcessRecipe(deltaTime, recipe, part);
+                    PostProcess(result,deltaTime);
+                }
+            }
+            catch (Exception e)
+            {
+                print("[REGO] - Error in - BaseConverter_OnFixedUpdate - " + e.Message); 
+            }
+        }
+
+        protected virtual void PostProcess(double result, double deltaTime)
+        {
+            status = String.Format("EFF: {0:0.00}%", result/deltaTime*100);           
         }
 
         protected virtual ConversionRecipe PrepareRecipe(double deltatime)

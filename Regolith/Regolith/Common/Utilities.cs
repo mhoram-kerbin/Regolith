@@ -68,5 +68,16 @@ namespace Regolith.Common
             //Default to 30 seconds
             return 30;
         }
+
+        public static double GetAltitude(Vessel v)
+        {
+            v.GetHeightFromTerrain();
+            double alt = v.heightFromTerrain;
+            if (alt < 0)
+            {
+                alt = v.mainBody.GetAltitude(v.CoM);
+            }
+            return alt;
+        }
     }
 }

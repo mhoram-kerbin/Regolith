@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Regolith.Common;
 
 namespace Regolith.Scenario
@@ -8,11 +9,8 @@ namespace Regolith.Scenario
         public static RegolithScenario Instance { get; private set; }
         public RegolithGameSettings gameSettings { get; private set; }
 
-        private readonly List<UnityEngine.Component> children = new List<UnityEngine.Component>();
-
         public RegolithScenario()
         {
-            print("Constructor");
             Instance = this;
             gameSettings = new RegolithGameSettings();
         }
@@ -21,7 +19,6 @@ namespace Regolith.Scenario
         {
             base.OnLoad(gameNode);
             gameSettings.Load(gameNode);
-            UpdatePlanetaryResourceData();
         }
 
         public override void OnSave(ConfigNode gameNode)
@@ -29,28 +26,6 @@ namespace Regolith.Scenario
             base.OnSave(gameNode);
             gameSettings.Save(gameNode);
         }
-
-        void OnDestroy()
-        {
-            foreach (UnityEngine.Component c in children)
-            {
-                Destroy(c);
-            }
-            children.Clear();
-        }
-
-        private void UpdatePlanetaryResourceData()
-        {
-            var resList = GameDatabase.Instance.GetConfigNodes("Regolith_Resource");
-            var allResData = Utilities.ImportConfigNodeList(resList);
-        }
-
-        private ResourceData LoadResource(ConfigNode resNode)
-        {
-            var res = new ResourceData();
-            return res;
-        }
-
 
     }
 }

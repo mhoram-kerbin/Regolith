@@ -102,7 +102,7 @@ namespace Regolith.Tests.Unit
             var resList = new List<ResourceData>();
             resList.Add(new ResourceData
                         {
-                            Distribution = new DistributionData { MinAtmosphericPresence = 0, MaxAtmosphericPresence = 30 },
+                            Distribution = new DistributionData { MinAbundance= 0, MaxAbundance = 30 },
                             ResourceName = "LiquidHydrogen"
                         });
             resList.AddRange(GetSimpleResults());

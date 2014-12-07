@@ -18,11 +18,8 @@ namespace Regolith.Common
         { }
 
 
-        public List<ResourceRatio> ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part resPart)
+        public double ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part resPart)
         {
-            //How recipes work:
-            var results = new List<ResourceRatio>();
-
             //We test for availability of all inputs
             var timeFactor = deltaTime;
             foreach (var r in recipe.Inputs.Where(r=>r.ResourceName != "ElectricCharge"))
@@ -63,7 +60,6 @@ namespace Regolith.Common
                     res.ResourceName == "ElectricCharge" 
                     ? _broker.RequestResource(resPart, res.ResourceName, res.Ratio * Math.Min(timeFactor, Utilities.GetECDeltaTime())) 
                     : _broker.RequestResource(resPart, res.ResourceName, res.Ratio * timeFactor);
-                results.Add(new ResourceRatio {Ratio = input * -1, ResourceName = res.ResourceName});
             }
             
             //Store outputs
@@ -71,10 +67,9 @@ namespace Regolith.Common
             {
 
                 var output = _broker.StoreResource(resPart, res.ResourceName, res.Ratio * timeFactor);
-                results.Add(new ResourceRatio { Ratio = output, ResourceName = res.ResourceName });
             }
 
-            return results;
+            return timeFactor;
         }
     }
 }
