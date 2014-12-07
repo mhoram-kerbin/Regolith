@@ -14,7 +14,7 @@ namespace Regolith.Scenario
             if (psm == null)
             {               
                 game.AddProtoScenarioModule(typeof(RegolithScenario), GameScenes.SPACECENTER,
-                    GameScenes.FLIGHT, GameScenes.EDITOR, GameScenes.SPH);
+                    GameScenes.FLIGHT, GameScenes.EDITOR);
             }
             else
             {
@@ -29,10 +29,6 @@ namespace Regolith.Scenario
                 if (psm.targetScenes.All(s => s != GameScenes.EDITOR))
                 {
                     psm.targetScenes.Add(GameScenes.EDITOR);
-                }
-                if (psm.targetScenes.All(s => s != GameScenes.SPH))
-                {
-                    psm.targetScenes.Add(GameScenes.SPH);
                 }
             }
         }

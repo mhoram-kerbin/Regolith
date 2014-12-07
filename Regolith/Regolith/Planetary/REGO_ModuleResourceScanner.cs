@@ -32,7 +32,24 @@ namespace Regolith.Planetary
 
         private void Setup()
         {
-            Fields["abundanceDisplay"].guiName = ResourceName + " abundance";
+            var suffix = "";
+            switch (ScannerType)
+            {
+                case 0:
+                    suffix = "Crust";
+                    break;
+                case 1:
+                    suffix = "Ocean";
+                    break;
+                case 2:
+                    suffix = "Atmo";
+                    break;
+                case 3:
+                    suffix = "IntPl";
+                    break;
+                   
+            }
+            Fields["abundanceDisplay"].guiName = ResourceName + "[" + suffix + "]";
             part.force_activate();
         }
 
@@ -43,7 +60,7 @@ namespace Regolith.Planetary
 
         private void CheckAbundanceDisplay()
         {
-            if (Utilities.GetAltitude(vessel) > maxAbundanceAltitude)
+            if (Utilities.GetAltitude(vessel) > maxAbundanceAltitude && !vessel.Landed && ScannerType == 0)
             {
                 abundanceDisplay = "Too high";
             }

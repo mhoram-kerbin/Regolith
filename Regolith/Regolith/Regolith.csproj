@@ -52,7 +52,7 @@
     <Compile Include="Planetary\REGO_ModuleResourceScanner.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceHarvester.cs" />
     <Compile Include="Common\REGO_ModuleResourceConverter.cs" />
-    <Compile Include="Common\REGO_ModuleTestScanner.cs" />
+    <Compile Include="Common\REGO_ModuleBiomeScanner.cs" />
     <Compile Include="Planetary\RegolithResourceMap.cs" />
     <Compile Include="Scenario\AddScenarioModules.cs" />
     <Compile Include="Common\ConversionRecipe.cs" />

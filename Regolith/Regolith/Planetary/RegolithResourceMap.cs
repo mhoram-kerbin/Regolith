@@ -86,7 +86,8 @@ namespace Regolith.Common
                 DistributionData distro = null;
                 seed *= (bodyId + 1);
                 seed += resourceName.Length * resourceName.Substring(1).ToCharArray().First();
-                seed += Convert.ToInt32(biome.mapColor.grayscale * 4096);
+                seed += body.bodyName.Length * body.bodyName.Substring(1).ToCharArray().First();
+                seed += Convert.ToInt32(biome.mapColor.grayscale * 4096) * (resourceType + 1);
                 //First - we need to determine our data set for randomization.
                 //Is there biome data?
                 var biomeConfigs = BiomeResources.Where(
@@ -132,26 +133,37 @@ namespace Regolith.Common
                     noiseSeed[ns] = rand.Next();
                 }
                 var spx = new SimplexNoiseGenerator(noiseSeed);
-                var noise = spx.noise((float)(lat + 180)/2, (float)(lon + 180)/2, rand.Next());
+                var noiseX = (float) lat;
+                var noiseY = (float) lon;
+                var noiseZ = (float) rand.Next(100) / 100f;
+                //print("[REGO] NX: " + noiseX);
+                //print("[REGO] NY: " + noiseY);
+                //print("[REGO] NZ: " + noiseZ);
+                var noise = spx.noise(noiseX, noiseY, noiseZ);
+                //print("[REGO] NOISE: " + noise);
                 var presenceRoll = rand.Next(100);
                 var isPresent = (presenceRoll <= distro.PresenceChance);
                 if (!isPresent)
                     return 0f;
 
                 //Basic abundance 
-                var min = distro.MinAbundance * 1000;
-                var max = distro.MaxAbundance * 1000;
+                int min = (int)distro.MinAbundance * 1000;
+                int max = (int)distro.MaxAbundance * 1000;
                 //In case someone is silly
                 if (min > max)
                     max = min + 1;
-                float abundance = rand.Next((int)min, (int)max) / 1000;
+                var ab = rand.Next(min, max);
+                float abundance = ab / 1000f;
+
+                //print("[REGO] ABUNDANCE-1: " + abundance);
 
                 //Variance and noise.  20% minimum.
-                //Only applies to all but interplanetary
+                //Applies to all but interplanetary
                 if (resourceType <= 2)
                 {
                     abundance += (abundance*noise*distro.Variance/100);
                 }
+                //print("[REGO] ABUNDANCE-2: " + abundance);
 
                 //Altitude band - only applies to atmospheric and interplanetary
                 if (resourceType >= 2 && distro.HasVariableAltitude())
