@@ -65,7 +65,6 @@ namespace Regolith.Common
                         distro.MinRange = cd.MinRange;
                     if (cd.MaxRange > 0 && cd.MaxRange > distro.MaxRange)
                         distro.MaxRange = cd.MaxRange;
-                
                 }
                 return distro;
             }
@@ -76,26 +75,46 @@ namespace Regolith.Common
             }
         }
 
+
+        private static CBAttributeMapSO.MapAttribute GetBiome(double lat, double lon, CelestialBody body)
+        {
+            try
+            {
+                var biome =  body.BiomeMap.GetAtt(lat, lon);
+                return biome;
+            }
+            catch (Exception)
+            {
+                //Just means we have no biome.                    
+                return null;
+            }
+        }
+
         public static float GetAbundance(double lat, double lon, string resourceName, int bodyId, int resourceType = 0, double altitude = 0)
         {
             try
             {
-                var cart = Utilities.LatLonToCart(lat, lon);
-                var body = FlightGlobals.Bodies[bodyId];
-                var biome = body.BiomeMap.GetAtt(cart.x,cart.y);
+                var body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == bodyId);
+                var biome = GetBiome(lat, lon, body);
                 var seed = RegolithScenario.Instance.gameSettings.seed;
-                DistributionData distro = null;
                 seed *= (bodyId + 1);
                 seed += resourceName.Length * resourceName.Substring(1).ToCharArray().First();
                 seed += body.bodyName.Length * body.bodyName.Substring(1).ToCharArray().First();
-                seed += Convert.ToInt32(biome.mapColor.grayscale * 4096) * (resourceType + 1);
+                if (biome != null)
+                    seed += Convert.ToInt32(biome.mapColor.grayscale*4096)*(resourceType + 1);
                 //First - we need to determine our data set for randomization.
                 //Is there biome data?
+                DistributionData distro = null;
+                var biomeName = "UNKNOWN";
+                if (biome != null)
+                {
+                    biomeName = biome.name;
+                }
                 var biomeConfigs = BiomeResources.Where(
-                    r => r.PlanetName == body.bodyName
-                         && r.BiomeName == biome.name
-                         && r.ResourceName == resourceName
-                         && r.ResourceType == resourceType).ToList();
+                        r => r.PlanetName == body.bodyName
+                             && r.BiomeName == biomeName
+                             && r.ResourceName == resourceName
+                             && r.ResourceType == resourceType).ToList();
                 var planetConfigs =
                     PlanetaryResources.Where(
                         r => r.PlanetName == body.bodyName
@@ -125,7 +144,6 @@ namespace Regolith.Common
                 {
                     return 0f;
                 }
-
                 var rand = new Random(seed);
                 //Our Simplex noise:
                 var noiseSeed = new int[8];
@@ -134,6 +152,7 @@ namespace Regolith.Common
                     noiseSeed[ns] = rand.Next();
                 }
                 var spx = new SimplexNoiseGenerator(noiseSeed);
+                var cart = Utilities.LatLonToCart(lat, lon);
                 var noiseX = (float) cart.x;
                 var noiseY = (float) cart.y;
                 var noiseZ = (float) rand.Next(100) / 100f;
@@ -146,10 +165,9 @@ namespace Regolith.Common
                 var isPresent = (presenceRoll <= distro.PresenceChance);
                 if (!isPresent)
                     return 0f;
-
                 //Basic abundance 
-                int min = (int)distro.MinAbundance * 1000;
-                int max = (int)distro.MaxAbundance * 1000;
+                int min = (int)(distro.MinAbundance * 1000);
+                int max = (int)(distro.MaxAbundance * 1000);
                 //In case someone is silly
                 if (min > max)
                     max = min + 1;
@@ -178,8 +196,7 @@ namespace Regolith.Common
                     abundance *= (float)modifier;
                 }
 
-                
-                
+
                 if (abundance <= Utilities.FLOAT_TOLERANCE)
                     return 0f;
 

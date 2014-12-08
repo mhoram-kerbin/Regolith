@@ -68,6 +68,10 @@ namespace Regolith.Planetary
             {
                 abundanceDisplay = "Unavailable";
             }
+            else if (FlightGlobals.currentMainBody.maxAtmosphereAltitude < 1 && ScannerType == 2)
+            {
+                abundanceDisplay = "Unavailable";
+            }
             else
             {
                 DisplayAbundance();
@@ -76,7 +80,7 @@ namespace Regolith.Planetary
 
         private void DisplayAbundance()
         {
-            if (abundanceValue > 0.001)
+            if (abundanceValue > 0.01)
             {
                 abundanceDisplay = (abundanceValue * 100.0).ToString("0.00") + "%";
             }

@@ -46,32 +46,32 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\BaseConverter.cs" />
-    <Compile Include="Common\REGO_ModuleAnalysisResource.cs" />
+    <Compile Include="Converters\BaseConverter.cs" />
+    <Compile Include="Asteroids\REGO_ModuleAnalysisResource.cs" />
     <Compile Include="Common\Noise.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceScanner.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceHarvester.cs" />
-    <Compile Include="Common\REGO_ModuleResourceConverter.cs" />
-    <Compile Include="Common\REGO_ModuleBiomeScanner.cs" />
+    <Compile Include="Converters\REGO_ModuleResourceConverter.cs" />
+    <Compile Include="Planetary\REGO_ModuleBiomeScanner.cs" />
     <Compile Include="Planetary\RegolithResourceMap.cs" />
     <Compile Include="Scenario\AddScenarioModules.cs" />
-    <Compile Include="Common\ConversionRecipe.cs" />
+    <Compile Include="Converters\ConversionRecipe.cs" />
     <Compile Include="Common\DistributionData.cs" />
     <Compile Include="Scenario\GlobalConfig.cs" />
     <Compile Include="Common\IAnimatedModule.cs" />
-    <Compile Include="Common\IResourceBroker.cs" />
+    <Compile Include="Converters\IResourceBroker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenario\RegolithGameSettings.cs" />
     <Compile Include="Scenario\RegolithScenario.cs" />
-    <Compile Include="Common\ResourceBroker.cs" />
+    <Compile Include="Converters\ResourceBroker.cs" />
     <Compile Include="Common\ResourceData.cs" />
-    <Compile Include="Common\ResourceRatio.cs" />
+    <Compile Include="Converters\ResourceRatio.cs" />
     <Compile Include="Common\REGO_ModuleAnimationGroup.cs" />
     <Compile Include="Asteroids\REGO_ModuleAsteroidAnalysis.cs" />
     <Compile Include="Asteroids\REGO_ModuleAsteroidDrill.cs" />
     <Compile Include="Asteroids\REGO_ModuleAsteroidInfo.cs" />
     <Compile Include="Asteroids\REGO_ModuleAsteroidResource.cs" />
-    <Compile Include="Common\ResourceConverter.cs" />
+    <Compile Include="Converters\ResourceConverter.cs" />
     <Compile Include="Common\Utilities.cs" />
   </ItemGroup>
   <ItemGroup />

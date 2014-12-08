@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
+using FinePrint;
 using Regolith.Asteroids;
 using Regolith.Scenario;
 using UnityEngine;
 
 namespace Regolith.Common
 {
-    public class REGO_ModuleCrustalHarvester : BaseConverter
+    public class REGO_ModuleResourceHarvester : BaseConverter
     {
         [KSPField(isPersistant = false)]
         public double Efficiency = .1;
@@ -22,6 +23,8 @@ namespace Regolith.Common
 
         [KSPField]
         public string ResourceName = "";
+
+        private double _resFlow = 0;
 
         protected override ConversionRecipe PrepareRecipe(double deltaTime)
         {
@@ -55,9 +58,13 @@ namespace Regolith.Common
                     .GetAbundance(vessel.latitude, vessel.longitude, ResourceName,
                         FlightGlobals.currentMainBody.flightGlobalsIndex,0);
                 var rate = abundance * Efficiency;
-                if (HarvesterType == 2) //Account for density
+                if (HarvesterType == 2) //Account for density and airspeed
                 {
-                    rate *= vessel.altitude/FlightGlobals.currentMainBody.maxAtmosphereAltitude;
+                    double atmDensity = part.vessel.atmDensity;
+                    double airSpeed = part.vessel.srf_velocity.magnitude + 40.0;
+                    double totalIntake = airSpeed*atmDensity;
+                    rate *=totalIntake;
+                    _resFlow = rate;
                 }
 
                 //Setup our recipe
@@ -76,6 +83,8 @@ namespace Regolith.Common
             var r = new ConversionRecipe();
             try
             {
+                bool dumpExcess = HarvesterType == 2;
+
                 var inputs = RecipeInputs.Split(',');
                 for (int ip = 0; ip < inputs.Count(); ip += 2)
                 {
@@ -92,7 +101,7 @@ namespace Regolith.Common
                 {
                     ResourceName = ResourceName,
                     Ratio = harvestRate,
-                    DumpExcess = false
+                    DumpExcess = dumpExcess
                 });
             }
             catch (Exception)
@@ -100,6 +109,20 @@ namespace Regolith.Common
                 print(String.Format("[REGOLITH] Error performing coversion for {0} - {1}", RecipeInputs, ResourceName));
             }
             return r;
+        }
+
+        protected override void PostProcess(double result, double deltaTime)
+        {
+            if (HarvesterType == 2)
+            {
+                //Special for atmospheric - we show rate..
+                status = String.Format("Flow: {0:0.00}%", _resFlow);      
+            }
+            else
+            {
+                //Otherwise, efficiency is fine
+                base.PostProcess(result, deltaTime);
+            }
         }
     }
 }

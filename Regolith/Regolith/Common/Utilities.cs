@@ -11,9 +11,20 @@ namespace Regolith.Common
 
         public static Vector2 LatLonToCart(double lat, double lon, int precision = 10)
         {
-            var x = (float)Math.Round(lon * Math.Cos(lat), precision);
-            var y = (float)Math.Round(lat, precision);
-            var cart = new Vector2(x, y);
+            double x = lon;
+            double y = lat;
+
+            if (x <= 0) x += 180;
+            if (y <= 0) y += 90;
+            
+            x = x*Math.Cos(y);
+            if (x < 0) x += 180;
+
+            var cx = (float)(Math.Round(x, precision));
+            var cy = (float)(Math.Round(y, precision));
+
+
+            var cart = new Vector2(cx, cy);
             return cart;
         }
 
