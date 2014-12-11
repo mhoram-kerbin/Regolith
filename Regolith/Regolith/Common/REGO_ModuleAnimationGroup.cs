@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using Regolith.Asteroids;
 using UnityEngine;
 
 namespace Regolith.Common 
@@ -134,6 +135,7 @@ namespace Regolith.Common
             Actions["DeployModuleAction"].guiName = "Deploy " + moduleType;
             Actions["RetractModuleAction"].guiName = "Retract " + moduleType;
             Actions["ToggleModuleAction"].guiName = "Toggle " + moduleType;
+            MonoUtilities.RefreshContextWindows(part);
         }
 
         public override void OnLoad(ConfigNode node)
@@ -241,6 +243,7 @@ namespace Regolith.Common
             Events["DeployModule"].active = true;
             PlayDeployAnimation(speed);
             DisableModules();
+            MonoUtilities.RefreshContextWindows(part);
         }
 
         private void SetDeployedState(int speed)
@@ -250,6 +253,7 @@ namespace Regolith.Common
             Events["RetractModule"].active = true;
             PlayDeployAnimation(speed);
             EnableModules();
+            MonoUtilities.RefreshContextWindows(part);
         }
 
         private void PlayDeployAnimation(int speed)

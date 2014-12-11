@@ -30,7 +30,7 @@ namespace Regolith.Common
                     timeFactor = timeFactor * (avail / (r.Ratio * timeFactor));
                 }
             }
-            //EC is a separate case
+            //EC is a separate case.  
             if (recipe.Inputs.Any(r => r.ResourceName == "ElectricCharge"))
             {
                 var ecRes = recipe.Inputs.First(r => r.ResourceName == "ElectricCharge");
@@ -56,10 +56,22 @@ namespace Regolith.Common
             //Pull inputs
             foreach (var res in recipe.Inputs)
             {
-                var input = 
-                    res.ResourceName == "ElectricCharge" 
-                    ? _broker.RequestResource(resPart, res.ResourceName, res.Ratio * Math.Min(timeFactor, Utilities.GetECDeltaTime())) 
-                    : _broker.RequestResource(resPart, res.ResourceName, res.Ratio * timeFactor);
+                double input;
+                if (res.ResourceName == "ElectricCharge")
+                {
+                    var ecTime = 0.02d;  //One tick
+                    //Exception for stupidly large warps:
+                    if (deltaTime < Utilities.GetMaxDeltaTime())
+                    {
+                        ecTime = Utilities.GetECDeltaTime();
+                    }
+                        input = _broker.RequestResource(resPart, res.ResourceName,
+                            res.Ratio*Math.Min(timeFactor, ecTime));
+                }
+                else
+                {
+                    input = _broker.RequestResource(resPart, res.ResourceName, res.Ratio * timeFactor);
+                }
             }
             
             //Store outputs

@@ -9,25 +9,6 @@ namespace Regolith.Common
     {
         public const double FLOAT_TOLERANCE = 0.000000001d;
 
-        public static Vector2 LatLonToCart(double lat, double lon, int precision = 10)
-        {
-            double x = lon;
-            double y = lat;
-
-            if (x <= 0) x += 180;
-            if (y <= 0) y += 90;
-            
-            x = x*Math.Cos(y);
-            if (x < 0) x += 180;
-
-            var cx = (float)(Math.Round(x, precision));
-            var cy = (float)(Math.Round(y, precision));
-
-
-            var cart = new Vector2(cx, cy);
-            return cart;
-        }
-
         public static T LoadNodeProperties<T>(ConfigNode node)
             where T : new()
         {
@@ -79,14 +60,14 @@ namespace Regolith.Common
 
         public static double GetMaxDeltaTime()
         {
-            //Default to one hour
-            return 3600;
+            //Default to one Kerbin day (6h)
+            return 21600;
         }
 
         public static double GetECDeltaTime()
         {
-            //Default to 30 seconds
-            return 30;
+            //Default to one second
+            return 1d;
         }
 
         public static double GetAltitude(Vessel v)

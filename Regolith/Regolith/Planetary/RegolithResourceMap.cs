@@ -152,9 +152,8 @@ namespace Regolith.Common
                     noiseSeed[ns] = rand.Next();
                 }
                 var spx = new SimplexNoiseGenerator(noiseSeed);
-                var cart = Utilities.LatLonToCart(lat, lon);
-                var noiseX = (float) cart.x;
-                var noiseY = (float) cart.y;
+                var noiseX = (float) lat;
+                var noiseY = (float) lon;
                 var noiseZ = (float) rand.Next(100) / 100f;
                 //print("[REGO] NX: " + noiseX);
                 //print("[REGO] NY: " + noiseY);
@@ -189,6 +188,7 @@ namespace Regolith.Common
                 {
                     var rad = body.Radius;
                     var ideal = ((rad*distro.MinAltitude) + (rad*distro.MaxAltitude))/2;
+                    //print("REGO: IDEAL = " + ideal);
                     var range = rand.Next((int)(rad * distro.MinRange), (int)(rad * distro.MaxRange));
                     var diff = Math.Abs(ideal - altitude);
                     var rangePerc = diff / range;
@@ -214,8 +214,9 @@ namespace Regolith.Common
         {
             //For precision, we'll be rounding.
             //This gives us 65K potential drill sites.
-            var cart = Utilities.LatLonToCart(lat, lon, 0);
-            return cart;
+            var x = Math.Round(lat, 0);
+            var y = Math.Round(lon, 0);
+            return new Vector2((float)x,(float)y);
         }
     }
 }

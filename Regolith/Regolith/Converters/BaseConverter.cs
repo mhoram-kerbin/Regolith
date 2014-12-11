@@ -13,6 +13,9 @@ namespace Regolith.Asteroids
         [KSPField(isPersistant = true)]
         public bool IsActivated = false;
 
+        [KSPField(isPersistant = true)]
+        public bool DirtyFlag = true;
+        
         [KSPField(isPersistant = false)]
         public string StartActionName;
 
@@ -105,9 +108,14 @@ namespace Regolith.Asteroids
 
         protected void UpdateConverterStatus()
         {
-            Events["StartResourceConverter"].active = !IsActivated;
-            Events["StopResourceConverter"].active = IsActivated;
-            status = "Operational";
+            if (DirtyFlag != IsActivated)
+            {
+                DirtyFlag = IsActivated;
+                Events["StartResourceConverter"].active = !IsActivated;
+                Events["StopResourceConverter"].active = IsActivated;
+                status = "Operational";
+                MonoUtilities.RefreshContextWindows(part);
+            }            
         }
 
         public override void OnLoad(ConfigNode node)
@@ -127,13 +135,15 @@ namespace Regolith.Asteroids
                 //Check for presence of an Animation Group.  If not present, enable the module.
                 if (!part.Modules.Contains("USI_ModuleAnimationGroup"))
                     EnableModule();
+
+                MonoUtilities.RefreshContextWindows(part);
             }
             catch (Exception e)
             {
                 print("[REGO] - Error in - BaseConverter_OnLoad - " + e.Message); 
             }
         }
-
+        
         public override void OnSave(ConfigNode node)
         {
             base.OnSave(node);
@@ -172,6 +182,23 @@ namespace Regolith.Asteroids
         {
             print("[REGOLITH] No Implementation of PrepareRecipe in derived class");
             return null;
+        }
+
+
+
+    }
+
+    public class MonoUtilities : MonoBehaviour
+    {
+        public static void RefreshContextWindows(Part part)
+        {
+            foreach (UIPartActionWindow window in FindObjectsOfType(typeof(UIPartActionWindow)))
+            {
+                if (window.part == part)
+                {
+                    window.displayDirty = true;
+                }
+            }
         }
     }
 }

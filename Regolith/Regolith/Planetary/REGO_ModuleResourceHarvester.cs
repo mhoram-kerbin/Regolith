@@ -12,8 +12,8 @@ namespace Regolith.Common
 {
     public class REGO_ModuleResourceHarvester : BaseConverter
     {
-        [KSPField(isPersistant = false)]
-        public double Efficiency = .1;
+        [KSPField]
+        public float Efficiency = .1f;
 
         [KSPField] 
         public int HarvesterType = 0;
@@ -24,7 +24,17 @@ namespace Regolith.Common
         [KSPField]
         public string ResourceName = "";
 
+
+        [KSPField(guiActive = true, guiName = "", guiActiveEditor = false)]
+        public string ResourceStatus = "Unknown"; 
+        
         private double _resFlow = 0;
+
+        public override void OnLoad(ConfigNode node)
+        {
+            base.OnLoad(node);
+            Fields["ResourceStatus"].guiName = ResourceName + " rate";
+        }
 
         protected override ConversionRecipe PrepareRecipe(double deltaTime)
         {
@@ -56,16 +66,23 @@ namespace Regolith.Common
            
                 var abundance = RegolithResourceMap
                     .GetAbundance(vessel.latitude, vessel.longitude, ResourceName,
-                        FlightGlobals.currentMainBody.flightGlobalsIndex,0);
+                        FlightGlobals.currentMainBody.flightGlobalsIndex,HarvesterType,vessel.altitude);
+                //print("[RD] Abundance: " + abundance);
+                //print("[RD] Efficiency: " + Efficiency);
                 var rate = abundance * Efficiency;
-                if (HarvesterType == 2) //Account for density and airspeed
+                //print("[RD] Rate: " + rate);
+                if (HarvesterType == 2) //Account for altitude and airspeed
                 {
-                    double atmDensity = part.vessel.atmDensity;
+                    double atmDensity = vessel.atmDensity;
+                    //print("[RD] atmDensity: " + atmDensity);
                     double airSpeed = part.vessel.srf_velocity.magnitude + 40.0;
-                    double totalIntake = airSpeed*atmDensity;
-                    rate *=totalIntake;
-                    _resFlow = rate;
-                }
+                    //print("[RD] airSpeed: " + airSpeed);
+                    double totalIntake = airSpeed * atmDensity;
+                    //print("[RD] totalIntake: " + totalIntake);
+                    rate *= (float)totalIntake;
+                    //print("[RD] rate: " + rate);
+                 }
+                _resFlow = rate;
 
                 //Setup our recipe
                 var recipe = LoadRecipe(rate);
@@ -84,7 +101,6 @@ namespace Regolith.Common
             try
             {
                 bool dumpExcess = HarvesterType == 2;
-
                 var inputs = RecipeInputs.Split(',');
                 for (int ip = 0; ip < inputs.Count(); ip += 2)
                 {
@@ -113,16 +129,9 @@ namespace Regolith.Common
 
         protected override void PostProcess(double result, double deltaTime)
         {
-            if (HarvesterType == 2)
-            {
-                //Special for atmospheric - we show rate..
-                status = String.Format("Flow: {0:0.00}%", _resFlow);      
-            }
-            else
-            {
-                //Otherwise, efficiency is fine
-                base.PostProcess(result, deltaTime);
-            }
+            ResourceStatus = String.Format("{0:0.0000}/sec", _resFlow);
+            //Otherwise, efficiency is fine
+            base.PostProcess(result, deltaTime);
         }
     }
 }

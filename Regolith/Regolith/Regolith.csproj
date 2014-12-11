@@ -49,6 +49,8 @@
     <Compile Include="Converters\BaseConverter.cs" />
     <Compile Include="Asteroids\REGO_ModuleAnalysisResource.cs" />
     <Compile Include="Common\Noise.cs" />
+    <Compile Include="Converters\REGO_ModuleAnimatedConverter.cs" />
+    <Compile Include="Converters\REGO_ModuleTrickleCharger.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceScanner.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceHarvester.cs" />
     <Compile Include="Converters\REGO_ModuleResourceConverter.cs" />
