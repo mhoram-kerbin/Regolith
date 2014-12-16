@@ -129,7 +129,7 @@ namespace Regolith.Common
 
         protected override void PostProcess(double result, double deltaTime)
         {
-            ResourceStatus = String.Format("{0:0.0000}/sec", _resFlow);
+            ResourceStatus = String.Format("{0:0.000000}/sec", _resFlow);
             //Otherwise, efficiency is fine
             base.PostProcess(result, deltaTime);
         }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using Regolith.Scenario;
 using UnityEngine;
 
@@ -64,10 +66,16 @@ namespace Regolith.Common
             return 21600;
         }
 
-        public static double GetECDeltaTime()
+        public static double GetSecondsPerTick()
         {
-            //Default to one second
-            return 1d;
+            //Default to 1/50th of a second
+            return 0.02f;
+        }
+
+        public static double GetMaxECDeltaTime()
+        {
+            //Default to 60 seconds
+            return 60f;
         }
 
         public static double GetAltitude(Vessel v)
@@ -79,6 +87,18 @@ namespace Regolith.Common
                 alt = v.mainBody.GetAltitude(v.CoM);
             }
             return alt;
+        }
+
+        public static T DeepClone<T>(T obj)
+        {
+            using (var ms = new MemoryStream())
+            {
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(ms, obj);
+                ms.Position = 0;
+
+                return (T)formatter.Deserialize(ms);
+            }
         }
     }
 }

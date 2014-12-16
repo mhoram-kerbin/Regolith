@@ -56,7 +56,7 @@ namespace Regolith.Tests.Unit
             var results = GetSimpleOutput();
             var conv = new ResourceConverter(new FakeResourceBroker());
             //We'll start with a delta time of 1 second - the default.
-            var actual = conv.ProcessRecipe(1,recipe, null);
+            var actual = conv.ProcessRecipe(1,recipe, null,1);
             var result = comp.Compare(results, actual);
             Assert.IsTrue(result.AreEqual);
         }
@@ -68,7 +68,7 @@ namespace Regolith.Tests.Unit
             var results = GetComplexOutput();
             var conv = new ResourceConverter(new FakeResourceBroker());
             //We'll start with a delta time of 1 second - the default.
-            var actual = conv.ProcessRecipe(1, recipe, null);
+            var actual = conv.ProcessRecipe(1, recipe, null,1);
             var result = comp.Compare(results, actual);
             Assert.IsTrue(result.AreEqual);
         }
@@ -79,7 +79,7 @@ namespace Regolith.Tests.Unit
             var recipe = GetComplexRecipe();
             var results = GetComplexOutputWithDelta();
             var conv = new ResourceConverter(new FakeResourceBroker());
-            var actual = conv.ProcessRecipe(0.5, recipe, null);
+            var actual = conv.ProcessRecipe(0.5, recipe, null,1);
             var result = comp.Compare(results, actual);
             Assert.IsTrue(result.AreEqual);
         }

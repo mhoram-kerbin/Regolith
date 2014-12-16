@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Regolith.Common;
 using UnityEngine;
 
@@ -10,6 +11,9 @@ namespace Regolith.Asteroids
     }
     public abstract class BaseConverter : PartModule, IAnimatedModule
     {
+        [KSPField(isPersistant = true)]
+        public float EfficiencBonus = 1;
+        
         [KSPField(isPersistant = true)]
         public bool IsActivated = false;
 
@@ -163,7 +167,7 @@ namespace Regolith.Asteroids
 
                 if (recipe != null)
                 {
-                    var result = _converter.ProcessRecipe(deltaTime, recipe, part);
+                    var result = _converter.ProcessRecipe(deltaTime, recipe, part, EfficiencBonus);
                     PostProcess(result,deltaTime);
                 }
             }
@@ -175,7 +179,7 @@ namespace Regolith.Asteroids
 
         protected virtual void PostProcess(double result, double deltaTime)
         {
-            status = String.Format("EFF: {0:0.00}%", result/deltaTime*100);           
+            status = String.Format("{0:0.00}% load", result/deltaTime*100);           
         }
 
         protected virtual ConversionRecipe PrepareRecipe(double deltatime)
@@ -186,19 +190,6 @@ namespace Regolith.Asteroids
 
 
 
-    }
 
-    public class MonoUtilities : MonoBehaviour
-    {
-        public static void RefreshContextWindows(Part part)
-        {
-            foreach (UIPartActionWindow window in FindObjectsOfType(typeof(UIPartActionWindow)))
-            {
-                if (window.part == part)
-                {
-                    window.displayDirty = true;
-                }
-            }
-        }
     }
 }

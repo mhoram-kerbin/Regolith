@@ -22,7 +22,11 @@ namespace Regolith.Asteroids
 
         [KSPField(isPersistant = true)]
         public bool DirectAttach = false;
-      
+
+        [KSPField] 
+        public bool RockOnly = false;
+
+
         protected override ConversionRecipe PrepareRecipe(double deltaTime)
         {
             //Determine if we are in fact latched to an asteroid
@@ -34,14 +38,14 @@ namespace Regolith.Asteroids
                 return null;
             }
 
-            if (DirectAttach && !part.children.Contains(potato))
+            if (DirectAttach && !(part.children.Contains(potato) || part.parent == potato))
             {
                 status = "Not directly attached to asteroid";
                 IsActivated = false;
                 return null;
             }
 
-            if (!potato.Modules.Contains("REGO_ModuleAsteroidResource"))
+            if (!RockOnly && !potato.Modules.Contains("REGO_ModuleAsteroidResource"))
             {
                 status = "No resource data";
                 IsActivated = false;
@@ -90,14 +94,23 @@ namespace Regolith.Asteroids
             var recipe = new ConversionRecipe();
             recipe.Inputs.Add(new ResourceRatio {ResourceName = "ElectricCharge", Ratio = PowerConsumption});
 
-            //Setup rock
-            var purity = resourceList.Sum(ar => ar.abundance);
-            var rockAmt = 1 - purity;
-            resourceList.Add(new REGO_ModuleAsteroidResource {abundance = rockAmt, resourceName = "Rock"});
+
+            if (RockOnly)
+            {
+                resourceList.Clear();
+                resourceList.Add(new REGO_ModuleAsteroidResource {abundance = 1, resourceName = "Rock"});
+            }
+            else
+            {
+                //Setup rock
+                var purity = resourceList.Sum(ar => ar.abundance);
+                var rockAmt = 1 - purity;
+                resourceList.Add(new REGO_ModuleAsteroidResource {abundance = rockAmt, resourceName = "Rock"});
+            }
 
             foreach (var ar in resourceList)
             {
-                if (!(ar.abundance > Utilities.FLOAT_TOLERANCE)) 
+                if (!(ar.abundance > Utilities.FLOAT_TOLERANCE))
                     continue;
                 var res = potato.Resources[ar.resourceName];
                 var resInfo = PartResourceLibrary.Instance.GetDefinition(res.resourceName);

@@ -9,11 +9,12 @@ namespace Regolith.Common
     {
         public List<ResourceRatio> Inputs { get; private set; }
         public List<ResourceRatio> Outputs { get; private set; }
-
+        public List<ResourceRatio> Requirements { get; private set; }
         public ConversionRecipe()
         {
             Inputs = new List<ResourceRatio>();
             Outputs = new List<ResourceRatio>();
+            Requirements = new List<ResourceRatio>();
         }
     }
 }

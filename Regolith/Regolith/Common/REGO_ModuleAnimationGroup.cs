@@ -81,6 +81,7 @@ namespace Regolith.Common
         {
             get
             {
+                if (deployAnimationName == "") return null;
                 return part.FindModelAnimators(deployAnimationName)[0];
             }
         }
@@ -107,7 +108,18 @@ namespace Regolith.Common
             FindModules();
             StopAnimations();
             CheckAnimationState();
-            DeployAnimation[deployAnimationName].layer = 3;
+
+            if (deployAnimationName != "")
+            {
+                DeployAnimation[deployAnimationName].layer = 3;
+            }
+            else
+            {
+                //Auto deploy if it has no animation
+                Events["DeployModule"].active = false;
+                Events["RetractModule"].active = false;
+                isDeployed = true;
+            }
             if (activeAnimationName != "")
             {
                 ActiveAnimation[activeAnimationName].layer = 4;
@@ -268,10 +280,16 @@ namespace Regolith.Common
                 {
                     DeactivateAnimation.Stop(deactivateAnimationName);
                 }
-                DeployAnimation[deployAnimationName].time = DeployAnimation[deployAnimationName].length;
+                if (deployAnimationName != "")
+                {
+                    DeployAnimation[deployAnimationName].time = DeployAnimation[deployAnimationName].length;
+                }
             }
-            DeployAnimation[deployAnimationName].speed = speed;
-            DeployAnimation.Play(deployAnimationName);
+            if (deployAnimationName != "")
+            {
+                DeployAnimation[deployAnimationName].speed = speed;
+                DeployAnimation.Play(deployAnimationName);
+            }
         }
 
         private void DisableModules()

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Regolith.Scenario;
-using SimplexNoise;
 using UnityEngine;
 using Random = System.Random;
 
@@ -151,7 +150,7 @@ namespace Regolith.Common
                 {
                     noiseSeed[ns] = rand.Next();
                 }
-                var spx = new SimplexNoiseGenerator(noiseSeed);
+                var spx = new NoiseGenerator(noiseSeed);
                 var noiseX = (float) lat;
                 var noiseY = (float) lon;
                 var noiseZ = (float) rand.Next(100) / 100f;
