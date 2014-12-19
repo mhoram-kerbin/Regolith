@@ -89,18 +89,24 @@ namespace Regolith.Common
             }
         }
 
-        public static float GetAbundance(double lat, double lon, string resourceName, int bodyId, int resourceType = 0, double altitude = 0)
+        public static float GetAbundance(double latitude, double longitude, string resourceName, int bodyId, int resourceType = 0, double altitude = 0)
         {
             try
             {
+                var northing = Utilities.Deg2Rad(latitude);
+                var easting = Utilities.Deg2Rad(longitude);
+
                 var body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == bodyId);
-                var biome = GetBiome(lat, lon, body);
+                var biome = GetBiome(northing, easting, body);
                 var seed = RegolithScenario.Instance.gameSettings.seed;
                 seed *= (bodyId + 1);
                 seed += resourceName.Length * resourceName.Substring(1).ToCharArray().First();
                 seed += body.bodyName.Length * body.bodyName.Substring(1).ToCharArray().First();
+
                 if (biome != null)
-                    seed += Convert.ToInt32(biome.mapColor.grayscale*4096)*(resourceType + 1);
+                {
+                    seed += Convert.ToInt32(biome.mapColor.grayscale * 4096) * (resourceType + 1);
+                }
                 //First - we need to determine our data set for randomization.
                 //Is there biome data?
                 DistributionData distro = null;
@@ -151,37 +157,37 @@ namespace Regolith.Common
                     noiseSeed[ns] = rand.Next();
                 }
                 var spx = new NoiseGenerator(noiseSeed);
-                var noiseX = (float) lat;
-                var noiseY = (float) lon;
-                var noiseZ = (float) rand.Next(100) / 100f;
-                //print("[REGO] NX: " + noiseX);
-                //print("[REGO] NY: " + noiseY);
-                //print("[REGO] NZ: " + noiseZ);
+                var noiseX = (float) northing;
+                var noiseY = (float) easting;
+                var noiseZ = (rand.Next(100)) / 100f;
                 var noise = spx.noise(noiseX, noiseY, noiseZ);
-                //print("[REGO] NOISE: " + noise);
+                
                 var presenceRoll = rand.Next(100);
                 var isPresent = (presenceRoll <= distro.PresenceChance);
                 if (!isPresent)
                     return 0f;
-                //Basic abundance 
-                int min = (int)(distro.MinAbundance * 1000);
-                int max = (int)(distro.MaxAbundance * 1000);
+                
+                //Abundance begins with a starting range.
+                var min = (int)(distro.MinAbundance * 1000);
+                var max = (int)(distro.MaxAbundance * 1000);
                 //In case someone is silly
                 if (min > max)
                     max = min + 1;
                 var ab = rand.Next(min, max);
-                float abundance = ab / 1000f;
+                //Start with lower abundance
+                float lowAbundance = ab / 1000f;
+                //Our upper bound uses our variance.
+                float highAbuncance = lowAbundance + (lowAbundance*distro.Variance/100);
+                //Default is average
+                var abundance = (lowAbundance + highAbuncance)/2;
 
-                //print("[REGO] ABUNDANCE-1: " + abundance);
 
-                //Variance and noise.  20% minimum.
                 //Applies to all but interplanetary
                 if (resourceType <= 2)
                 {
-                    abundance += (abundance*noise*distro.Variance/100);
+                    //Otherwise, it's a function of noise.
+                    abundance = lowAbundance + (noise*(highAbuncance - lowAbundance));
                 }
-                //print("[REGO] ABUNDANCE-2: " + abundance);
-
                 //Altitude band - only applies to atmospheric and interplanetary
                 if (resourceType >= 2 && distro.HasVariableAltitude())
                 {
@@ -209,12 +215,14 @@ namespace Regolith.Common
             }
         }
 
-        public static Vector2 GetDepletionNode(double lat, double lon)
+        public static Vector2 GetDepletionNode(double latitude, double longitude)
         {
             //For precision, we'll be rounding.
             //This gives us 65K potential drill sites.
-            var x = Math.Round(lat, 0);
-            var y = Math.Round(lon, 0);
+            var adjLat = Utilities.Rad2Lat(latitude);
+            var adjLon = Utilities.Rad2Lon(longitude);
+            var x = Math.Round(adjLat, 0);
+            var y = Math.Round(adjLon, 0);
             return new Vector2((float)x,(float)y);
         }
     }

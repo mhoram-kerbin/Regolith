@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using Regolith.Scenario;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace Regolith.Common
             //Iterate our properties and set values
             foreach (var val in node.values)
             {
-                var cval = (ConfigNode.Value)val;
+                var cval = (ConfigNode.Value) val;
                 var propInfo = nodeType.GetProperty(cval.name);
                 if (propInfo != null)
                 {
@@ -97,8 +98,46 @@ namespace Regolith.Common
                 formatter.Serialize(ms, obj);
                 ms.Position = 0;
 
-                return (T)formatter.Deserialize(ms);
+                return (T) formatter.Deserialize(ms);
             }
+        }
+
+
+        public static double Deg2Rad(double degrees)
+        {
+            return degrees*Math.PI/180;
+        }
+
+        public static double Rad2Lat(double radians)
+        {
+            var rad = radians%(Math.PI*2);
+            if (rad < 0)
+                rad = 2*Math.PI + rad;
+            
+            var radLat = rad%(Math.PI);
+            if (radLat > Math.PI/2)
+                radLat = Math.PI - radLat;
+            if (rad > Math.PI)
+                rad = -radLat;
+            else
+                rad = radLat;
+            return (rad/Math.PI*180);
+        }
+
+        public static double Rad2Lon(double radians)
+        {
+            var rad = radians%(Math.PI*2);
+            if (rad < 0)
+                rad = 2*Math.PI + rad;
+            
+            var radLon = rad%(Math.PI*2);
+            if (radLon > Math.PI)
+                radLon = Math.PI*2 - radLon;
+            if (rad > Math.PI)
+                rad = -radLon;
+            else
+                rad = radLon;
+            return (rad/Math.PI*180);
         }
     }
 }
