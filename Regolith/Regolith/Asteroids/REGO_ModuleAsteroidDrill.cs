@@ -20,6 +20,9 @@ namespace Regolith.Asteroids
         [KSPField(isPersistant = true)]
         public string ImpactTransform = "";
 
+        [KSPField(isPersistant = false)]
+        public float ImpactRange = 5f;
+
         [KSPField(isPersistant = true)]
         public bool DirectAttach = false;
 
@@ -142,7 +145,7 @@ namespace Regolith.Asteroids
             var pos = t.position;
             RaycastHit hitInfo;
             var ray = new Ray(pos, t.forward);
-            Physics.Raycast(ray, out hitInfo, 5f);
+            Physics.Raycast(ray, out hitInfo, ImpactRange);
             if (hitInfo.collider != null)
             {
                 var colType =   hitInfo.collider.attachedRigidbody.gameObject.name;

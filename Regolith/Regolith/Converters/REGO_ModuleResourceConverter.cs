@@ -17,6 +17,8 @@ namespace Regolith.Common
         public string RequiredResources = "";
 
 
+
+
         public ConversionRecipe Recipe
         {
             get { return _recipe ?? (_recipe = LoadRecipe()); }

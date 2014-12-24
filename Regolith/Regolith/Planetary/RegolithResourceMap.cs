@@ -152,13 +152,13 @@ namespace Regolith.Common
                 var rand = new Random(seed);
                 //Our Simplex noise:
                 var noiseSeed = new int[8];
-                for (int ns = 0; ns < 8; ns++)
+                for (var ns = 0; ns < 8; ns++)
                 {
                     noiseSeed[ns] = rand.Next();
                 }
                 var spx = new NoiseGenerator(noiseSeed);
-                var noiseX = (float) northing;
-                var noiseY = (float) easting;
+                var noiseX = (float) northing * distro.Variance / 10f;
+                var noiseY = (float)easting * distro.Variance / 10f;
                 var noiseZ = (rand.Next(100)) / 100f;
                 var noise = spx.noise(noiseX, noiseY, noiseZ);
                 
@@ -173,20 +173,18 @@ namespace Regolith.Common
                 //In case someone is silly
                 if (min > max)
                     max = min + 1;
-                var ab = rand.Next(min, max);
-                //Start with lower abundance
-                float lowAbundance = ab / 1000f;
-                //Our upper bound uses our variance.
-                float highAbuncance = lowAbundance + (lowAbundance*distro.Variance/100);
-                //Default is average
-                var abundance = (lowAbundance + highAbuncance)/2;
-
+                var abundance = (rand.Next(min, max))/1000f;
 
                 //Applies to all but interplanetary
                 if (resourceType <= 2)
                 {
-                    //Otherwise, it's a function of noise.
-                    abundance = lowAbundance + (noise*(highAbuncance - lowAbundance));
+                    //Lets add some noise...
+                    float swing = abundance*(distro.Variance/100f);
+                    abundance = abundance - swing + (swing*noise*2);
+                    //You should only be able to hit zero if someohe sets their
+                    //variance >= 100
+                    if (abundance < 0)
+                        abundance = 0;
                 }
                 //Altitude band - only applies to atmospheric and interplanetary
                 if (resourceType >= 2 && distro.HasVariableAltitude())
