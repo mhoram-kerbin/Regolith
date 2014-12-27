@@ -48,6 +48,26 @@ namespace Regolith.Common
             return resList;
         }
 
+        public static List<DepletionData> ImportDepletionNodeList(ConfigNode[] nodes)
+        {
+            var depDataList = new List<DepletionData>();
+            foreach (var node in nodes)
+            {
+                var depData = LoadNodeProperties<DepletionData>(node);
+                var depNodeList = node.GetNodes("DEPLETION_NODE");
+                if (depNodeList != null)
+                {
+                    foreach (var dnode in depNodeList)
+                    {
+                        var depNode = LoadNodeProperties<DepletionNode>(dnode);
+                        depData.DepletionNodes.Add(depNode);
+                    }                   
+                }
+                depDataList.Add(depData);
+            }
+            return depDataList;
+        }
+
         public static double GetValue(ConfigNode node, string name, double curVal)
         {
             double newVal;

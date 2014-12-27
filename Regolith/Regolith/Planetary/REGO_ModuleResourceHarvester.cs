@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Regolith.Common
 {
-    public class REGO_ModuleResourceHarvester : BaseConverter
+    public class REGO_ModuleResourceHarvester : ResourceModule
     {
         [KSPField]
         public float Efficiency = .1f;
@@ -24,6 +24,11 @@ namespace Regolith.Common
         [KSPField]
         public string ResourceName = "";
 
+        [KSPField] 
+        public float DepletionRate = 0f;
+
+        [KSPField] 
+        public bool CausesDepletion = false;
 
         [KSPField(guiActive = true, guiName = "", guiActiveEditor = false)]
         public string ResourceStatus = "Unknown"; 
@@ -67,20 +72,13 @@ namespace Regolith.Common
                 var abundance = RegolithResourceMap
                     .GetAbundance(vessel.latitude, vessel.longitude, ResourceName,
                         FlightGlobals.currentMainBody.flightGlobalsIndex,HarvesterType,vessel.altitude);
-                //print("[RD] Abundance: " + abundance);
-                //print("[RD] Efficiency: " + Efficiency);
                 var rate = abundance * Efficiency;
-                //print("[RD] Rate: " + rate);
                 if (HarvesterType == 2) //Account for altitude and airspeed
                 {
                     double atmDensity = vessel.atmDensity;
-                    //print("[RD] atmDensity: " + atmDensity);
                     double airSpeed = part.vessel.srf_velocity.magnitude + 40.0;
-                    //print("[RD] airSpeed: " + airSpeed);
                     double totalIntake = airSpeed * atmDensity;
-                    //print("[RD] totalIntake: " + totalIntake);
                     rate *= (float)totalIntake;
-                    //print("[RD] rate: " + rate);
                  }
                 _resFlow = rate;
 
@@ -130,7 +128,27 @@ namespace Regolith.Common
         protected override void PostProcess(double result, double deltaTime)
         {
             ResourceStatus = String.Format("{0:0.000000}/sec", _resFlow);
-            //Otherwise, efficiency is fine
+            if (CausesDepletion)
+            {
+                //Depletion time. This is a function of a few things:
+                // - the overall rate - this is capped at 100% (Anything beyond that reflects mining gear that is
+                //   more efficient and less likely to cause depletion.  
+                //   with large delta time swings (like insta-strip mining).  I'm ok with 
+                // - the depletion rate
+                // - the current depletion level at this node
+                var flow =(float) Math.Min(1,result/deltaTime);
+                var depNode = RegolithResourceMap.GetDepletionNode(FlightGlobals.ship_latitude,
+                    FlightGlobals.ship_latitude);
+                float curDep =
+                    RegolithScenario.Instance.gameSettings.GetDepletionNodeValue(vessel.mainBody.flightGlobalsIndex,
+                        ResourceName, (int)depNode.x, (int)depNode.y);
+                float netDepRate = DepletionRate*flow;
+                float newDep = curDep - (curDep*netDepRate);
+
+                RegolithScenario.Instance.gameSettings.SetDepletionNodeValue(vessel.mainBody.flightGlobalsIndex,
+                        ResourceName, (int)depNode.x, (int)depNode.y,newDep);
+
+            }
             base.PostProcess(result, deltaTime);
         }
     }

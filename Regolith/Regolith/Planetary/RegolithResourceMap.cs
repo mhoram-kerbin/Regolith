@@ -98,7 +98,7 @@ namespace Regolith.Common
 
                 var body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == bodyId);
                 var biome = GetBiome(northing, easting, body);
-                var seed = RegolithScenario.Instance.gameSettings.seed;
+                var seed = RegolithScenario.Instance.gameSettings.Seed;
                 seed *= (bodyId + 1);
                 seed += resourceName.Length * resourceName.Substring(1).ToCharArray().First();
                 seed += body.bodyName.Length * body.bodyName.Substring(1).ToCharArray().First();
@@ -215,12 +215,12 @@ namespace Regolith.Common
 
         public static Vector2 GetDepletionNode(double latitude, double longitude)
         {
-            //For precision, we'll be rounding.
-            //This gives us 65K potential drill sites.
+            //For precision, we'll be rounding and going up an order of magnitude.
+            //This gives us 6.4 Milliom potential drill sites.
             var adjLat = Utilities.Rad2Lat(latitude);
             var adjLon = Utilities.Rad2Lon(longitude);
-            var x = Math.Round(adjLat, 0);
-            var y = Math.Round(adjLon, 0);
+            var x = Math.Round(adjLat * 10, 0);
+            var y = Math.Round(adjLon * 10, 0);
             return new Vector2((float)x,(float)y);
         }
     }

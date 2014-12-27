@@ -50,8 +50,8 @@
     <Compile Include="Asteroids\REGO_ModuleAnalysisResource.cs" />
     <Compile Include="Common\NoiseGenerator.cs" />
     <Compile Include="Converters\MonoUtilities.cs" />
-    <Compile Include="Converters\REGO_ModuleAnimatedConverter.cs" />
     <Compile Include="Converters\REGO_ModuleTrickleCharger.cs" />
+    <Compile Include="Converters\ResourceModule.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceScanner.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceHarvester.cs" />
     <Compile Include="Converters\REGO_ModuleResourceConverter.cs" />
@@ -60,10 +60,11 @@
     <Compile Include="Scenario\AddScenarioModules.cs" />
     <Compile Include="Converters\ConversionRecipe.cs" />
     <Compile Include="Common\DistributionData.cs" />
-    <Compile Include="Scenario\GlobalConfig.cs" />
     <Compile Include="Common\IAnimatedModule.cs" />
     <Compile Include="Converters\IResourceBroker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenario\DepletionData.cs" />
+    <Compile Include="Scenario\DepletionNode.cs" />
     <Compile Include="Scenario\RegolithGameSettings.cs" />
     <Compile Include="Scenario\RegolithScenario.cs" />
     <Compile Include="Converters\ResourceBroker.cs" />
