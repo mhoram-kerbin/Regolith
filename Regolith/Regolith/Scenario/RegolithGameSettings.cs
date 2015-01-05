@@ -50,6 +50,23 @@ namespace Regolith.Scenario
             }
 
             SettingsNode.AddValue("GameSeed", Seed);
+            foreach (var dd in DepletionInfo)
+            {
+                var dNode = new ConfigNode("DEPLETION_DATA");
+                dNode.AddValue("PlanetId", dd.PlanetId);
+                dNode.AddValue("ResourceName", dd.ResourceName);
+
+                foreach (var dn in dd.DepletionNodes)
+                {
+                    var nNode = new ConfigNode("DEPLETION_NODE");
+                    nNode.AddValue("X", dn.X);
+                    nNode.AddValue("Y", dn.Y);
+                    nNode.AddValue("Value", dn.Value);
+                    nNode.AddValue("LastUpdate", dn.LastUpdate);
+                    dNode.AddNode(nNode);
+                }
+                SettingsNode.AddNode(dNode);
+            }
         }
 
         public static int GetValue(ConfigNode config, string name, int currentValue)
@@ -65,21 +82,6 @@ namespace Regolith.Scenario
             }
         }
 
-        /*DepletionNodeStorage
-         * 
-         *      DEPLETION_DATA
-         *      {
-         *          PLANET_ID = 1
-         *          RESOURCE_NAME = Karbonite
-         *          DEPLETION_NODE
-         *          {
-         *              x = 10
-         *              y = 20
-         *              value = 0.1
-         *              lastUpdate = 1234567890
-         *          }
-         *      }
-         */
 
         private DepletionNode GetDepletionNode(int planetId, string resource, int x, int y)
         {

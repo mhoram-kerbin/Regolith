@@ -44,12 +44,17 @@ namespace Regolith.Common
                 return 0f;
 
             //We test for availability of all inputs
-            var timeFactor = deltaTime;
+            double timeFactor = deltaTime;
             foreach (var r in recipe.Inputs.Where(r=>r.ResourceName != "ElectricCharge"))
             {
+                // 10 seconds with a ratio of 2/sec and a bonus of 1.5 means we need 30.
                 var avail = _broker.AmountAvailable(resPart, r.ResourceName);
+                //If we only have 15...
+                //15 < (2*10*1.5)[30]
                 if (avail < r.Ratio * timeFactor * bonus)
                 {
+                    //Then we reduce our timeFactor to 5.
+                    // 10 * (15 / (2*10*1.5)[30]) = .5
                     timeFactor = timeFactor * (avail / (r.Ratio * timeFactor * bonus));
                 }
             }
@@ -64,27 +69,41 @@ namespace Regolith.Common
                 //If for some reason we don't have all of the EC we need, fall back to max EC time,
                 //which defaults to about a minute.  The reason is that if the resource is there (i.e. batteries)
                 //then we want to take it.  But if not, then let's make sure they have enough battery power to cover
-                //6o seconds of operation - which seems pretty reasonable.
+                //10 seconds of operation - which seems pretty reasonable.
                 if (avail < ecWarp)
                     ecWarp = Utilities.GetMaxECDeltaTime();
                 
-                if (avail < Math.Min(ecRes.Ratio * timeFactor * bonus, ecWarp))
+                //The only time this should affect our overall conversion rate
+                //is if we can't even meet this basic requirement.  i.e. we can't run stuff on empty.
+                //In that case, the whole shebang shuts down to be in line with the EC number.
+                var ecGoal = Math.Min(ecRes.Ratio*timeFactor*bonus, ecWarp);
+
+                if (avail < ecGoal)
                 {
-                    timeFactor = timeFactor*Math.Min((avail / (ecRes.Ratio* timeFactor * bonus)), ecWarp);
+                    //We currently have a TimeFactor of 10.
+                    //Our EC goal is 2.  But we only have 1.
+                    //Hence, or TimeFactor should now be 5.
+                    
+                    // 10 * ( 1 / 2 ) = 5
+                    var ectimeFactor = timeFactor*(avail/ecGoal);
+                    timeFactor = ectimeFactor;
                 }
             }
 
 
             //test for space of all outputs.  Ignore ones where it's ok to dump them
+            //Also:  We do use the FillAmount, this effectively fools the system into thinking there is 
+            //less space available than there really is.  The use case would be things where we want a slow charge,
+            //such as battery charging, etc.
             foreach (var r in recipe.Outputs.Where(ro=>!ro.DumpExcess))
             {
-                var space = _broker.StorageAvailable(resPart, r.ResourceName);
+                var space = (_broker.StorageAvailable(resPart, r.ResourceName))* recipe.FillAmount;
+                
                 if (space < r.Ratio * timeFactor * bonus)
                 {
                     timeFactor = timeFactor * (space / (r.Ratio * timeFactor * bonus));
                 }
             }
-
 
             //Pull inputs
             foreach (var res in recipe.Inputs)

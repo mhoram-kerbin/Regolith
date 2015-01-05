@@ -12,7 +12,7 @@ namespace Regolith.Asteroids
     public abstract class BaseConverter : PartModule, IAnimatedModule
     {
         [KSPField(isPersistant = true)]
-        public float EfficiencBonus = 1;
+        public float EfficiencyBonus = 1;
         
         [KSPField(isPersistant = true)]
         public bool IsActivated = false;
@@ -28,6 +28,9 @@ namespace Regolith.Asteroids
 
         [KSPField(isPersistant = false)]
         public string ConverterName = "";
+
+        [KSPField] 
+        public float FillAmount = 1;
 
         [KSPField(guiActive = true, guiName = "", guiActiveEditor = false)]
         public string status = "Unknown";
@@ -161,14 +164,13 @@ namespace Regolith.Asteroids
                 //Check our time
                 var deltaTime = GetDeltaTime();
                 if (deltaTime < 0) return;
-
                 var recipe = PrepareRecipe(deltaTime);
-
-
+                //To support trickle charging
                 if (recipe != null)
                 {
-                    var result = _converter.ProcessRecipe(deltaTime, recipe, part, EfficiencBonus);
-                    PostProcess(result,deltaTime);
+                    recipe.FillAmount = FillAmount;
+                    var result = _converter.ProcessRecipe(deltaTime, recipe, part, EfficiencyBonus);
+                    PostProcess(result, deltaTime);
                 }
             }
             catch (Exception e)

@@ -83,8 +83,8 @@ namespace Regolith.Common
 
         public static double GetMaxDeltaTime()
         {
-            //Default to one Kerbin day (6h)
-            return 21600;
+            //Default to 24h
+            return 86400;
         }
 
         public static double GetSecondsPerTick()
@@ -94,9 +94,8 @@ namespace Regolith.Common
         }
 
         public static double GetMaxECDeltaTime()
-        {
-            //Default to 60 seconds
-            return 60f;
+        {           
+            return 1;
         }
 
         public static double GetAltitude(Vessel v)

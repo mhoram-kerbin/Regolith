@@ -18,6 +18,12 @@ namespace Regolith.Common
         [KSPField]
         public string deactivateAnimationName = "";
 
+        [KSPField] 
+        public string deployActionName = "Deploy";
+
+        [KSPField]
+        public string retractActionName = "Retract";
+
 
         [KSPField(isPersistant = true)]
         public bool isDeployed = false;
@@ -142,10 +148,10 @@ namespace Regolith.Common
 
         private void Setup()
         {
-            Events["DeployModule"].guiName = "Deploy " + moduleType;
-            Events["RetractModule"].guiName = "Retract " + moduleType;
-            Actions["DeployModuleAction"].guiName = "Deploy " + moduleType;
-            Actions["RetractModuleAction"].guiName = "Retract " + moduleType;
+            Events["DeployModule"].guiName = deployActionName + " " + moduleType;
+            Events["RetractModule"].guiName = retractActionName + " " + moduleType;
+            Actions["DeployModuleAction"].guiName = deployActionName + " " + moduleType;
+            Actions["RetractModuleAction"].guiName = retractActionName + " " + moduleType;
             Actions["ToggleModuleAction"].guiName = "Toggle " + moduleType;
             MonoUtilities.RefreshContextWindows(part);
         }

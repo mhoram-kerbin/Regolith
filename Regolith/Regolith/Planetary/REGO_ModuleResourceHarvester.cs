@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Regolith.Common
 {
-    public class REGO_ModuleResourceHarvester : ResourceModule
+    public class REGO_ModuleResourceHarvester : BaseConverter
     {
         [KSPField]
         public float Efficiency = .1f;
@@ -51,14 +51,12 @@ namespace Regolith.Common
                 if (HarvesterType == 0 && !vessel.Landed)
                 {
                     status = "must land first";
-                    print("[REGO] Shutting down because vehicle is not landed");
                     IsActivated = false;
                     return null;
                 }
                 if (HarvesterType == 1 && !vessel.Splashed)
                 {
                     status = "must be splashed down";
-                    print("[REGO] Shutting down because vehicle is not splashed");
                     IsActivated = false;
                     return null;
                 }
@@ -138,18 +136,19 @@ namespace Regolith.Common
                 // - the current depletion level at this node
                 var flow =(float) Math.Min(1,result/deltaTime);
                 var depNode = RegolithResourceMap.GetDepletionNode(FlightGlobals.ship_latitude,
-                    FlightGlobals.ship_latitude);
+                    FlightGlobals.ship_longitude);
                 float curDep =
                     RegolithScenario.Instance.gameSettings.GetDepletionNodeValue(vessel.mainBody.flightGlobalsIndex,
                         ResourceName, (int)depNode.x, (int)depNode.y);
                 float netDepRate = DepletionRate*flow;
                 float newDep = curDep - (curDep*netDepRate);
-
+                
                 RegolithScenario.Instance.gameSettings.SetDepletionNodeValue(vessel.mainBody.flightGlobalsIndex,
                         ResourceName, (int)depNode.x, (int)depNode.y,newDep);
 
             }
             base.PostProcess(result, deltaTime);
         }
+
     }
 }

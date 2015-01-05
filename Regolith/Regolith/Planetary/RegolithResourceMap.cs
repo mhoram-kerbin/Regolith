@@ -215,12 +215,12 @@ namespace Regolith.Common
 
         public static Vector2 GetDepletionNode(double latitude, double longitude)
         {
-            //For precision, we'll be rounding and going up an order of magnitude.
-            //This gives us 6.4 Milliom potential drill sites.
+            //For precision, we'll be rounding.
+            //This gives us 64K potential drill sites.
             var adjLat = Utilities.Rad2Lat(latitude);
             var adjLon = Utilities.Rad2Lon(longitude);
-            var x = Math.Round(adjLat * 10, 0);
-            var y = Math.Round(adjLon * 10, 0);
+            var x = Math.Round(adjLat, 0);
+            var y = Math.Round(adjLon, 0);
             return new Vector2((float)x,(float)y);
         }
     }
