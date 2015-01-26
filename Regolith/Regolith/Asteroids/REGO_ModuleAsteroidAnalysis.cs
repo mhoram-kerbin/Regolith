@@ -40,9 +40,7 @@ namespace Regolith.Asteroids
                                 resTotal += analysis.abundance;
                             }
                         }
-                        Fields["status"].guiName = "Rock";
-                        status = string.Format("{0:0.0000}%", 100 - (resTotal * 100));
-
+                        Fields["status"].guiActive = false;
                     }
                     return;
                 }

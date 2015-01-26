@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Regolith.Common;
+using Regolith.Converters;
 using UnityEngine;
 
 namespace Regolith.Asteroids
@@ -95,44 +96,35 @@ namespace Regolith.Asteroids
             
             //Fetch our recipe
             var recipe = new ConversionRecipe();
-            recipe.Inputs.Add(new ResourceRatio {ResourceName = "ElectricCharge", Ratio = PowerConsumption});
 
+            //If ANY resources have storage space, we attempt to do mass conversion.
+            //If there is NO storage space available, there is no output and EC is dumped.
+            bool spaceAvailable = resourceList.Any(res => _broker.StorageAvailable(part, res.resourceName) > 0);
 
-            if (RockOnly)
+            if (spaceAvailable)
             {
-                resourceList.Clear();
-                resourceList.Add(new REGO_ModuleAsteroidResource {abundance = 1, resourceName = "Rock"});
+                recipe.Inputs.Add(new ResourceRatio {ResourceName = "ElectricCharge", Ratio = PowerConsumption});
+                foreach (var ar in resourceList)
+                {
+                    if (ar.abundance <= Utilities.FLOAT_TOLERANCE)
+                        continue;
+                    var resInfo = PartResourceLibrary.Instance.GetDefinition(ar.resourceName);
+                    //Make sure we have enough mass
+                    var desiredUnits = deltaTime*ar.abundance*Efficiency;
+                    var slackMass = potato.mass - info.massThreshold;
+                    var maxUnits = slackMass / resInfo.density;
+                    var unitsToAdd = Math.Min(desiredUnits, maxUnits);
+                    var newMass = potato.mass - ((float)(resInfo.density * unitsToAdd));
+                    potato.mass = newMass;
+                    var outRes = new ResourceRatio { ResourceName = ar.resourceName, Ratio = unitsToAdd, DumpExcess = true};
+                    recipe.Outputs.Add(outRes);
+                }
             }
             else
             {
-                //Setup rock
-                var purity = resourceList.Sum(ar => ar.abundance);
-                var rockAmt = 1 - purity;
-                resourceList.Add(new REGO_ModuleAsteroidResource {abundance = rockAmt, resourceName = "Rock"});
+                status = "No Storage Space";
             }
 
-            foreach (var ar in resourceList)
-            {
-                if (!(ar.abundance > Utilities.FLOAT_TOLERANCE))
-                    continue;
-                var res = potato.Resources[ar.resourceName];
-                var resInfo = PartResourceLibrary.Instance.GetDefinition(res.resourceName);
-                var outRes = new ResourceRatio {ResourceName = ar.resourceName, Ratio = ar.abundance*Efficiency};
-                //Make sure we have enough free space
-                var spaceNeeded = deltaTime*ar.abundance*Efficiency;
-                var spaceAvailable = res.maxAmount - res.amount;
-                if (spaceAvailable < spaceNeeded)
-                {
-                    var slackMass = potato.mass - info.massThreshold;
-                    var maxSpace = slackMass/resInfo.density;
-                    var unitsToAdd = Math.Min(maxSpace, (spaceNeeded - spaceAvailable));
-                    var newMass = potato.mass - ((float) (resInfo.density*unitsToAdd));
-                    res.maxAmount += unitsToAdd;
-                    potato.mass = newMass;
-
-                }
-                recipe.Outputs.Add(outRes);
-            }
             return recipe;
         }
 
