@@ -114,6 +114,7 @@ namespace Regolith.Planetary
         public void DisableModule()
         {
             isEnabled = false;
+            isActive = false;
         }
 
         public bool ModuleIsActive()

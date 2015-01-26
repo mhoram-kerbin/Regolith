@@ -7,9 +7,16 @@ using UnityEngine;
 
 namespace Regolith.Common
 {
+    public struct ConverterResults
+    {
+        public string Status;
+        public double TimeFactor;
+    }
+
     public class ResourceConverter : MonoBehaviour
     {
         private IResourceBroker _broker;
+
         public ResourceConverter(IResourceBroker broker)
         {
             _broker = broker;
@@ -18,9 +25,10 @@ namespace Regolith.Common
         public ResourceConverter() : this(new ResourceBroker())
         { }
 
-
-        public double ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part resPart, float efficiencyBonus)
+        public ConverterResults ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part resPart, float efficiencyBonus)
         {
+            var result = new ConverterResults();
+            result.Status = "Idle";
             //Efficiency bonus is comprised of two things.
             //The bonus passed in, and the presence of all required components.
             var bonus = 1d; //We start at 100%.
@@ -41,7 +49,11 @@ namespace Regolith.Common
             bonus *= efficiencyBonus;
             //It may be that we're at zero!
             if (bonus <= Utilities.FLOAT_TOLERANCE)
-                return 0f;
+            {
+                result.Status = "Missing resources";
+                result.TimeFactor = 0;
+                return result;
+            }
 
             //We test for availability of all inputs
             double timeFactor = deltaTime;
@@ -90,6 +102,11 @@ namespace Regolith.Common
                 }
             }
 
+            if (timeFactor < deltaTime)
+            {
+                result.Status = "Missing inputs";
+            }
+
 
             //test for space of all outputs.  Ignore ones where it's ok to dump them
             //Also:  We do use the FillAmount, this effectively fools the system into thinking there is 
@@ -103,6 +120,11 @@ namespace Regolith.Common
                 {
                     timeFactor = timeFactor * (space / (r.Ratio * timeFactor * bonus));
                 }
+            }
+
+            if (timeFactor < deltaTime)
+            {
+                result.Status = "No space";
             }
 
             //Pull inputs
@@ -132,7 +154,8 @@ namespace Regolith.Common
             }
 
             //Work in bonus so our efficiency value is correct.
-            return timeFactor * bonus;
+            result.TimeFactor = timeFactor * bonus;
+            return result;
         }
     }
 }

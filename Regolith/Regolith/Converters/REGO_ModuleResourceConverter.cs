@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using Regolith.Asteroids;
+using Regolith.Converters;
 
 namespace Regolith.Common
 {
@@ -97,7 +98,7 @@ namespace Regolith.Common
             sb.Append(".");
             sb.Append("\n");
             sb.Append(ConverterName);
-            sb.Append("\n\nInputs:");
+            sb.Append("\n\n<color=#99FF00>Inputs:</color>"); 
             foreach (var input in recipe.Inputs)
             {
                 sb.Append("\n - ")
@@ -105,11 +106,11 @@ namespace Regolith.Common
                     .Append(": ");
                 if (input.Ratio < 0.0001)
                 {
-                    sb.Append(String.Format("{0:0.00}", input.Ratio * 21600)).Append("/6h");
+                    sb.Append(String.Format("{0:0.00}", input.Ratio * 21600)).Append("/day");
                 }
                 else if (input.Ratio < 0.01)
                 {
-                    sb.Append(String.Format("{0:0.00}", input.Ratio * 3600)).Append("/hr");
+                    sb.Append(String.Format("{0:0.00}", input.Ratio * 3600)).Append("/hour");
                 }
                 else
                 {
@@ -117,7 +118,7 @@ namespace Regolith.Common
                 }
                     
             }
-            sb.Append("\n\nOutputs: ");
+            sb.Append("\n<color=#99FF00>Outputs:</color>");
             foreach (var output in recipe.Outputs)
             {
                 sb.Append("\n - ")
@@ -125,24 +126,27 @@ namespace Regolith.Common
                     .Append(": ");
                 if (output.Ratio < 0.0001)
                 {
-                    sb.Append(String.Format("{0:0.00}", output.Ratio * 21600)).Append("/6h");
+                    sb.Append(String.Format("{0:0.00}", output.Ratio * 21600)).Append("/day");
                 }
                 else if (output.Ratio < 0.01)
                 {
-                    sb.Append(String.Format("{0:0.00}", output.Ratio * 3600)).Append("/hr");
+                    sb.Append(String.Format("{0:0.00}", output.Ratio * 3600)).Append("/hour");
                 }
                 else
                 {
                     sb.Append(String.Format("{0:0.00}", output.Ratio)).Append("/sec");
                 }
             }
-            sb.Append("\n\nRequirements: ");
-            foreach (var output in recipe.Requirements)
+            if (recipe.Requirements.Any())
             {
-                sb.Append("\n - ")
-                    .Append(output.ResourceName)
-                    .Append(": ");
+                sb.Append("\n<color=#99FF00>Requirements:</color>");
+                foreach (var output in recipe.Requirements)
+                {
+                    sb.Append("\n - ")
+                        .Append(output.ResourceName)
+                        .Append(": ");
                     sb.Append(String.Format("{0:0.00}", output.Ratio));
+                }
             }
             sb.Append("\n");
             return sb.ToString();

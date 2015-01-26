@@ -5,6 +5,7 @@ using System.Security.AccessControl;
 using System.Text;
 using FinePrint;
 using Regolith.Asteroids;
+using Regolith.Converters;
 using Regolith.Scenario;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace Regolith.Common
         [KSPField]
         public float Efficiency = .1f;
 
-        [KSPField] 
+        [KSPField]
         public int HarvesterType = 0;
 
         [KSPField]
@@ -24,16 +25,98 @@ namespace Regolith.Common
         [KSPField]
         public string ResourceName = "";
 
-        [KSPField] 
+        [KSPField]
         public float DepletionRate = 0f;
 
-        [KSPField] 
+        [KSPField]
+        public float HarvestThreshold = 0f;
+        
+        [KSPField]
         public bool CausesDepletion = false;
 
         [KSPField(guiActive = true, guiName = "", guiActiveEditor = false)]
-        public string ResourceStatus = "Unknown"; 
-        
+        public string ResourceStatus = "n/a";
+
         private double _resFlow = 0;
+
+        private string GetLocationString()
+        {
+            switch (HarvesterType)
+            {
+                case 0:
+                    return "Planetary";
+                case 1:
+                    return "Oceanic";
+                case 2:
+                    return "Atmospheric";
+                case 3:
+                    return "Interplanetary";
+            }
+            return "???";
+        }
+
+        public override string GetInfo()
+        {
+            var sb = new StringBuilder();
+            var recipe = LoadRecipe(1);
+            sb.Append(".");
+            sb.Append("\n");
+            sb.Append(ConverterName);
+            sb.Append("\n");
+            sb.Append("<color=#BADA55>(" + GetLocationString() + " use)</color>");
+            sb.Append("\n\n<color=#99FF00>Max inputs:</color>");
+            foreach (var input in recipe.Inputs)
+            {
+                sb.Append("\n - ")
+                    .Append(input.ResourceName)
+                    .Append(": ");
+                if (input.Ratio < 0.0001)
+                {
+                    sb.Append(String.Format("{0:0.00}", input.Ratio * 21600)).Append("/6h");
+                }
+                else if (input.Ratio < 0.01)
+                {
+                    sb.Append(String.Format("{0:0.00}", input.Ratio * 3600)).Append("/hr");
+                }
+                else
+                {
+                    sb.Append(String.Format("{0:0.00}", input.Ratio)).Append("/sec");
+                }
+
+            }
+            sb.Append("\n<color=#99FF00>Max outputs:</color>");
+            foreach (var output in recipe.Outputs)
+            {
+                sb.Append("\n - ")
+                    .Append(output.ResourceName)
+                    .Append(": ");
+                if (output.Ratio < 0.0001)
+                {
+                    sb.Append(String.Format("{0:0.00}", output.Ratio * 21600)).Append("/6h");
+                }
+                else if (output.Ratio < 0.01)
+                {
+                    sb.Append(String.Format("{0:0.00}", output.Ratio * 3600)).Append("/hr");
+                }
+                else
+                {
+                    sb.Append(String.Format("{0:0.00}", output.Ratio)).Append("/sec");
+                }
+            }
+            if (recipe.Requirements.Any())
+            {
+                sb.Append("\n<color=#99FF00>Requirements:</color>");
+                foreach (var output in recipe.Requirements)
+                {
+                    sb.Append("\n - ")
+                        .Append(output.ResourceName)
+                        .Append(": ");
+                    sb.Append(String.Format("{0:0.00}", output.Ratio));
+                }
+            }
+            sb.Append("\n");
+            return sb.ToString();
+        }
 
         public override void OnLoad(ConfigNode node)
         {
@@ -61,15 +144,24 @@ namespace Regolith.Common
                     return null;
                 }
 
-                //Handle state change
-                UpdateConverterStatus();
-                if (!IsActivated)
-                    return null;
-
-           
                 var abundance = RegolithResourceMap
                     .GetAbundance(vessel.latitude, vessel.longitude, ResourceName,
-                        FlightGlobals.currentMainBody.flightGlobalsIndex,HarvesterType,vessel.altitude);
+                        FlightGlobals.currentMainBody.flightGlobalsIndex, HarvesterType, vessel.altitude);
+                
+                //Harvesting thresholds, if used.
+                if (abundance < HarvestThreshold || abundance < Utilities.FLOAT_TOLERANCE)
+                {
+                    status = "nothing to harvest";
+                    IsActivated = false;
+                    return null;
+                }
+
+                if (!IsActivated)
+                {
+                    status = "Inactive";
+                    return null;
+                }
+
                 var rate = abundance * Efficiency;
                 if (HarvesterType == 2) //Account for altitude and airspeed
                 {
@@ -77,7 +169,7 @@ namespace Regolith.Common
                     double airSpeed = part.vessel.srf_velocity.magnitude + 40.0;
                     double totalIntake = airSpeed * atmDensity;
                     rate *= (float)totalIntake;
-                 }
+                }
                 _resFlow = rate;
 
                 //Setup our recipe
@@ -91,6 +183,18 @@ namespace Regolith.Common
             }
         }
 
+        protected override void PostUpdateCleanup()
+        {
+            if (IsActivated)
+            {
+                ResourceStatus = String.Format("{0:0.000000}/sec", _resFlow);
+            }
+            else
+            {
+                ResourceStatus = "n/a";
+            }
+        }
+
         private ConversionRecipe LoadRecipe(double harvestRate)
         {
             var r = new ConversionRecipe();
@@ -100,7 +204,6 @@ namespace Regolith.Common
                 var inputs = RecipeInputs.Split(',');
                 for (int ip = 0; ip < inputs.Count(); ip += 2)
                 {
-                    //print(String.Format("[REGOLITH] - INPUT {0} {1}", inputs[ip], inputs[ip + 1]));
                     r.Inputs.Add(new ResourceRatio
                     {
                         ResourceName = inputs[ip].Trim(),
@@ -108,13 +211,13 @@ namespace Regolith.Common
                     });
                 }
 
-                //print(String.Format("[REGOLITH] - OUTPUT RESOURCE {0} {1}", ResourceName,Efficiency));
                 r.Outputs.Add(new ResourceRatio
                 {
                     ResourceName = ResourceName,
                     Ratio = harvestRate,
                     DumpExcess = dumpExcess
                 });
+
             }
             catch (Exception)
             {
@@ -123,9 +226,8 @@ namespace Regolith.Common
             return r;
         }
 
-        protected override void PostProcess(double result, double deltaTime)
+        protected override void PostProcess(ConverterResults result, double deltaTime)
         {
-            ResourceStatus = String.Format("{0:0.000000}/sec", _resFlow);
             if (CausesDepletion)
             {
                 //Depletion time. This is a function of a few things:
@@ -134,17 +236,17 @@ namespace Regolith.Common
                 //   with large delta time swings (like insta-strip mining).  I'm ok with 
                 // - the depletion rate
                 // - the current depletion level at this node
-                var flow =(float) Math.Min(1,result/deltaTime);
+                var flow = (float)Math.Min(1, result.TimeFactor / deltaTime);
                 var depNode = RegolithResourceMap.GetDepletionNode(FlightGlobals.ship_latitude,
                     FlightGlobals.ship_longitude);
                 float curDep =
                     RegolithScenario.Instance.gameSettings.GetDepletionNodeValue(vessel.mainBody.flightGlobalsIndex,
                         ResourceName, (int)depNode.x, (int)depNode.y);
-                float netDepRate = DepletionRate*flow;
-                float newDep = curDep - (curDep*netDepRate);
-                
+                float netDepRate = DepletionRate * flow;
+                float newDep = curDep - (curDep * netDepRate);
+
                 RegolithScenario.Instance.gameSettings.SetDepletionNodeValue(vessel.mainBody.flightGlobalsIndex,
-                        ResourceName, (int)depNode.x, (int)depNode.y,newDep);
+                        ResourceName, (int)depNode.x, (int)depNode.y, newDep);
 
             }
             base.PostProcess(result, deltaTime);

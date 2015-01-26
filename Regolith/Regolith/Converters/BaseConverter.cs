@@ -1,14 +1,11 @@
 using System;
-using System.Text;
+using System.Collections.Generic;
+using Regolith.Asteroids;
 using Regolith.Common;
 using UnityEngine;
 
-namespace Regolith.Asteroids
+namespace Regolith.Converters
 {
-    public interface IGenericConverter
-    {
-        
-    }
     public abstract class BaseConverter : PartModule, IAnimatedModule
     {
         [KSPField(isPersistant = true)]
@@ -33,7 +30,7 @@ namespace Regolith.Asteroids
         public float FillAmount = 1;
 
         [KSPField(guiActive = true, guiName = "", guiActiveEditor = false)]
-        public string status = "Unknown";
+        public string status = "Inactive";
 
         [KSPEvent(guiActive = true, guiName = "Start Converter", active = false)]
         public void StartResourceConverter()
@@ -45,6 +42,7 @@ namespace Regolith.Asteroids
         public void StopResourceConverter()
         {
             IsActivated = false;
+            status = "Inactive";
         }
 
         [KSPAction("Stop Converter")]
@@ -63,7 +61,6 @@ namespace Regolith.Asteroids
         protected IResourceBroker _broker;
         protected ResourceConverter _converter;
 
-
         protected BaseConverter()
         {
             _broker = new ResourceBroker();
@@ -79,6 +76,7 @@ namespace Regolith.Asteroids
         public void DisableModule()
         {
             isEnabled = false;
+            IsActivated = false;
         }
 
         public bool ModuleIsActive()
@@ -120,7 +118,10 @@ namespace Regolith.Asteroids
                 DirtyFlag = IsActivated;
                 Events["StartResourceConverter"].active = !IsActivated;
                 Events["StopResourceConverter"].active = IsActivated;
-                status = "Operational";
+                if (IsActivated)
+                {
+                    status = "Operational";
+                }
                 MonoUtilities.RefreshContextWindows(part);
             }            
         }
@@ -132,18 +133,16 @@ namespace Regolith.Asteroids
                 base.OnLoad(node);
                 lastUpdateTime = Utilities.GetValue(node, "lastUpdateTime", lastUpdateTime);
                 part.force_activate();
-
                 Events["StartResourceConverter"].guiName = StartActionName;
                 Events["StopResourceConverter"].guiName = StopActionName;
                 Actions["StartResourceConverterAction"].guiName = StartActionName;
                 Actions["StopResourceConverterAction"].guiName = StopActionName;
                 Fields["status"].guiName = ConverterName;
-
+                Fields["load"].guiName = ConverterName + " Load";
                 //Check for presence of an Animation Group.  If not present, enable the module.
-                if (!part.Modules.Contains("USI_ModuleAnimationGroup"))
+                if (!part.Modules.Contains("REGO_ModuleAnimationGroup"))
                     EnableModule();
-
-                MonoUtilities.RefreshContextWindows(part);
+           
             }
             catch (Exception e)
             {
@@ -161,17 +160,23 @@ namespace Regolith.Asteroids
         {
             try
             {
-                //Check our time
-                var deltaTime = GetDeltaTime();
-                if (deltaTime < 0) return;
-                var recipe = PrepareRecipe(deltaTime);
-                //To support trickle charging
-                if (recipe != null)
+                //Handle state change
+                UpdateConverterStatus();
+                if (IsActivated)
                 {
-                    recipe.FillAmount = FillAmount;
-                    var result = _converter.ProcessRecipe(deltaTime, recipe, part, EfficiencyBonus);
-                    PostProcess(result, deltaTime);
+                    //Check our time
+                    var deltaTime = GetDeltaTime();
+                    if (deltaTime < 0) return;
+                    var recipe = PrepareRecipe(deltaTime);
+                    //To support trickle charging
+                    if (recipe != null)
+                    {
+                        recipe.FillAmount = FillAmount;
+                        var result = _converter.ProcessRecipe(deltaTime, recipe, part, EfficiencyBonus);
+                        PostProcess(result, deltaTime);
+                    }
                 }
+                PostUpdateCleanup();
             }
             catch (Exception e)
             {
@@ -179,9 +184,22 @@ namespace Regolith.Asteroids
             }
         }
 
-        protected virtual void PostProcess(double result, double deltaTime)
+        protected virtual void PostUpdateCleanup()
         {
-            status = String.Format("{0:0.00}% load", result/deltaTime*100);           
+            //Runs regardless of generator state.
+        }
+
+        protected virtual void PostProcess(ConverterResults result, double deltaTime)
+        {
+            var statString = String.Format("{0:0.00}% load", result.TimeFactor/deltaTime*100);
+            if (result.TimeFactor <= Utilities.FLOAT_TOLERANCE)
+            {
+                status = result.Status;
+            }
+            else
+            {
+                status = statString;
+            }
         }
 
         protected virtual ConversionRecipe PrepareRecipe(double deltatime)
@@ -189,9 +207,5 @@ namespace Regolith.Asteroids
             print("[REGOLITH] No Implementation of PrepareRecipe in derived class");
             return null;
         }
-
-
-
-
     }
 }

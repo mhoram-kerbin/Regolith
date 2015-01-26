@@ -60,7 +60,6 @@ namespace Regolith.Common
                 if (Math.Abs(demandLeft) < Utilities.FLOAT_TOLERANCE) continue;
             }
             
-            //This should generally be demand unless weird stuff happened.
             return amountTaken;
         }
 
