@@ -29,6 +29,10 @@ namespace Regolith.Converters
         [KSPField] 
         public float FillAmount = 1;
 
+        [KSPField]
+        public float TakeAmount = 1;
+
+        
         [KSPField(guiActive = true, guiName = "", guiActiveEditor = false)]
         public string status = "Inactive";
 
@@ -177,6 +181,7 @@ namespace Regolith.Converters
                     if (recipe != null)
                     {
                         recipe.FillAmount = FillAmount;
+                        recipe.TakeAmount = TakeAmount;
                         var result = _converter.ProcessRecipe(deltaTime, recipe, part, EfficiencyBonus);
                         PostProcess(result, deltaTime);
                     }

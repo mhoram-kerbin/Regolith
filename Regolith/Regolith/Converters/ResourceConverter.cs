@@ -60,7 +60,9 @@ namespace Regolith.Common
             foreach (var r in recipe.Inputs.Where(r=>r.ResourceName != "ElectricCharge"))
             {
                 // 10 seconds with a ratio of 2/sec and a bonus of 1.5 means we need 30.
-                var avail = _broker.AmountAvailable(resPart, r.ResourceName);
+                //Include our take amount multiplier to fool us into having less capacity than we
+                //really have.
+                var avail = _broker.AmountAvailable(resPart, r.ResourceName) * recipe.TakeAmount;
                 //If we only have 15...
                 //15 < (2*10*1.5)[30]
                 if (avail < r.Ratio * timeFactor * bonus)
