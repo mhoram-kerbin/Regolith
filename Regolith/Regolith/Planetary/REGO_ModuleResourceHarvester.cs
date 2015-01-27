@@ -41,18 +41,7 @@ namespace Regolith.Common
 
         private string GetLocationString()
         {
-            switch (HarvesterType)
-            {
-                case 0:
-                    return "Planetary";
-                case 1:
-                    return "Oceanic";
-                case 2:
-                    return "Atmospheric";
-                case 3:
-                    return "Interplanetary";
-            }
-            return "???";
+            return ((HarvestTypes) HarvesterType).ToString();
         }
 
         public override string GetInfo()
@@ -144,9 +133,17 @@ namespace Regolith.Common
                     return null;
                 }
 
-                var abundance = RegolithResourceMap
-                    .GetAbundance(vessel.latitude, vessel.longitude, ResourceName,
-                        FlightGlobals.currentMainBody.flightGlobalsIndex, HarvesterType, vessel.altitude);
+                var abRequest = new AbundanceRequest
+                                {
+                                    Altitude = vessel.altitude,
+                                    BodyId = FlightGlobals.currentMainBody.flightGlobalsIndex,
+                                    CheckForLock = false,
+                                    Latitude = vessel.latitude,
+                                    Longitude = vessel.longitude,
+                                    ResourceType = (HarvestTypes)HarvesterType,
+                                    ResourceName = ResourceName
+                                };
+                var abundance = RegolithResourceMap.GetAbundance(abRequest);
                 
                 //Harvesting thresholds, if used.
                 if (abundance < HarvestThreshold || abundance < Utilities.FLOAT_TOLERANCE)

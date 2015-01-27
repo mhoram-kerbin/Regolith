@@ -128,6 +128,8 @@ namespace Regolith.Converters
 
         public override void OnLoad(ConfigNode node)
         {
+            if (vessel == null)
+                return;
             try
             {
                 base.OnLoad(node);
@@ -140,10 +142,13 @@ namespace Regolith.Converters
                 Fields["status"].guiName = ConverterName;
                 Fields["load"].guiName = ConverterName + " Load";
                 //Check for presence of an Animation Group.  If not present, enable the module.
+
                 if (!part.Modules.Contains("REGO_ModuleAnimationGroup"))
-                    EnableModule();
-           
+                {
+                        EnableModule();
+                }
             }
+
             catch (Exception e)
             {
                 print("[REGO] - Error in - BaseConverter_OnLoad - " + e.Message); 

@@ -11,8 +11,8 @@ namespace Regolith.Scenario
     {
         public int Seed { get; set; }
         public List<DepletionData> DepletionInfo { get; private set; }
+        public List<BiomeLockData> BiomeLockInfo { get; private set; }
         public ConfigNode SettingsNode { get; private set; }
-
 
         public void Load(ConfigNode node)
         {
@@ -21,6 +21,7 @@ namespace Regolith.Scenario
                 SettingsNode = node.GetNode("RegolithGameSettings");
                 Seed = GetValue(SettingsNode, "GameSeed", Seed);
                 DepletionInfo = SetupDepletionInfo();
+                BiomeLockInfo = SetupBiomeLockInfo();
             }
             else
             {
@@ -28,6 +29,7 @@ namespace Regolith.Scenario
                 var r = new System.Random();
                 Seed = r.Next(1, Int32.MaxValue);
                 DepletionInfo = new List<DepletionData>();
+                BiomeLockInfo = new List<BiomeLockData>();
             }
         }
 
@@ -38,6 +40,13 @@ namespace Regolith.Scenario
             return Utilities.ImportDepletionNodeList(depletionNodes);
         }
 
+        private List<BiomeLockData> SetupBiomeLockInfo()
+        {
+            var biomeLockNodes = SettingsNode.GetNodes("BIOME_LOCK_DATA");
+            return Utilities.ImportBiomeLockNodeList(biomeLockNodes);
+        }
+
+        
         public void Save(ConfigNode node)
         {
             if (node.HasNode("RegolithGameSettings"))
@@ -67,6 +76,15 @@ namespace Regolith.Scenario
                 }
                 SettingsNode.AddNode(dNode);
             }
+
+            foreach (var bd in BiomeLockInfo)
+            {
+                var bNode = new ConfigNode("BIOME_LOCK_DATA");
+                bNode.AddValue("PlanetId", bd.PlanetId);
+                bNode.AddValue("BiomeName", bd.BiomeName);
+                SettingsNode.AddNode(bNode);
+            }        
+        
         }
 
         public static int GetValue(ConfigNode config, string name, int currentValue)
@@ -125,5 +143,25 @@ namespace Regolith.Scenario
             node.LastUpdate = Planetarium.GetUniversalTime();
         }
 
+        public bool IsBiomeUnlocked(int planetId, string biomeName)
+        {
+            //Does a node exist?
+            return BiomeLockInfo.Any(n => n.PlanetId == planetId && n.BiomeName == biomeName);
+        }
+
+        public void UnlockBiome(int planetId, string biomeName)
+        {
+            if (IsBiomeUnlocked(planetId, biomeName))
+                return;
+
+            var biomeInfo = new BiomeLockData
+                            {
+                                PlanetId = planetId,
+                                BiomeName = biomeName
+                            };
+            BiomeLockInfo.Add(biomeInfo);
+        }
+
+    
     }
 }

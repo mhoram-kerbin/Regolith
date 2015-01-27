@@ -28,7 +28,6 @@ namespace Regolith.Asteroids
                     if (_potato == null)
                     {
                         _potato = potatoes.FirstOrDefault();
-                        var resTotal = 0f;
                         var resources = _potato.FindModulesImplementing<REGO_ModuleAsteroidResource>();
                         foreach (var res in resources)
                         {
@@ -37,7 +36,6 @@ namespace Regolith.Asteroids
                             if (analysis != null)
                             {
                                 analysis.abundance = res.abundance;
-                                resTotal += analysis.abundance;
                             }
                         }
                         Fields["status"].guiActive = false;

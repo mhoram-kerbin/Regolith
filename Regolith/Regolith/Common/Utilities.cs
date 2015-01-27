@@ -12,6 +12,20 @@ namespace Regolith.Common
     {
         public const double FLOAT_TOLERANCE = 0.000000001d;
 
+        public static CBAttributeMapSO.MapAttribute GetBiome(double lat, double lon, CelestialBody body)
+        {
+            try
+            {
+                var biome = body.BiomeMap.GetAtt(lat, lon);
+                return biome;
+            }
+            catch (Exception)
+            {
+                //Just means we have no biome.                    
+                return null;
+            }
+        }
+
         public static T LoadNodeProperties<T>(ConfigNode node)
             where T : new()
         {
@@ -67,6 +81,18 @@ namespace Regolith.Common
             }
             return depDataList;
         }
+
+        public static List<BiomeLockData> ImportBiomeLockNodeList(ConfigNode[] nodes)
+        {
+            var biomeList = new List<BiomeLockData>();
+            foreach (var node in nodes)
+            {
+                var nodeData = LoadNodeProperties<BiomeLockData>(node);
+                biomeList.Add(nodeData);
+            }
+            return biomeList;
+        }
+
 
         public static double GetValue(ConfigNode node, string name, double curVal)
         {

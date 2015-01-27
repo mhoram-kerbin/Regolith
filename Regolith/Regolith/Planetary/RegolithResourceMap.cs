@@ -74,61 +74,74 @@ namespace Regolith.Common
             }
         }
 
-
-        private static CBAttributeMapSO.MapAttribute GetBiome(double lat, double lon, CelestialBody body)
+        [Obsolete("Keeping in for SCANSat compatibility, use an AbundanceRequest instead")]
+        public static float GetAbundance(double latitude, double longitude, string resourceName, int bodyId,
+            HarvestTypes resourceType = HarvestTypes.Planetary, double altitude = 0)
         {
-            try
-            {
-                var biome =  body.BiomeMap.GetAtt(lat, lon);
-                return biome;
-            }
-            catch (Exception)
-            {
-                //Just means we have no biome.                    
-                return null;
-            }
+            var abRequest = new AbundanceRequest
+                            {
+                                Latitude = latitude,
+                                Longitude = longitude,
+                                BodyId = bodyId,
+                                ResourceName = resourceName,
+                                ResourceType = resourceType,
+                                Altitude = altitude,
+                                CheckForLock = true
+                            };
+            return GetAbundance(abRequest);
         }
 
-        public static float GetAbundance(double latitude, double longitude, string resourceName, int bodyId, int resourceType = 0, double altitude = 0)
+        public static int GenerateAbundanceSeed(AbundanceRequest request, CBAttributeMapSO.MapAttribute biome, CelestialBody body)
+        {
+            var seed = RegolithScenario.Instance.gameSettings.Seed;
+            seed *= (request.BodyId + 1);
+            seed += request.ResourceName.Length * request.ResourceName.Substring(1).ToCharArray().First();
+            seed += body.bodyName.Length * body.bodyName.Substring(1).ToCharArray().First();
+
+            if (biome != null)
+            {
+                seed += Convert.ToInt32(biome.mapColor.grayscale * 4096) * ((int)request.ResourceType + 1);
+            }
+            return seed;
+        }
+
+        public static float GetAbundance(AbundanceRequest request)
         {
             try
             {
-                var northing = Utilities.Deg2Rad(latitude);
-                var easting = Utilities.Deg2Rad(longitude);
-
-                var body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == bodyId);
-                var biome = GetBiome(northing, easting, body);
-                var seed = RegolithScenario.Instance.gameSettings.Seed;
-                seed *= (bodyId + 1);
-                seed += resourceName.Length * resourceName.Substring(1).ToCharArray().First();
-                seed += body.bodyName.Length * body.bodyName.Substring(1).ToCharArray().First();
-
-                if (biome != null)
-                {
-                    seed += Convert.ToInt32(biome.mapColor.grayscale * 4096) * (resourceType + 1);
-                }
-                //First - we need to determine our data set for randomization.
-                //Is there biome data?
-                DistributionData distro = null;
-                var biomeName = "UNKNOWN";
+                var northing = Utilities.Deg2Rad(request.Latitude);
+                var easting = Utilities.Deg2Rad(request.Longitude);
+                var body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == request.BodyId);
+                var biome = Utilities.GetBiome(northing, easting, body);
+                var seed = GenerateAbundanceSeed(request, biome, body);
+                var biomeName = GetDefaultSituation(request.ResourceType);
                 if (biome != null)
                 {
                     biomeName = biome.name;
                 }
+
+                //Is the biome even locked?  If not, just return a negative one
+                //so the consuming application can act accordingly.
+                if (RegolithScenario.Instance.gameSettings.IsBiomeUnlocked(request.BodyId, biomeName))
+                    return -1;
+
+                //We need to determine our data set for randomization.
+                //Is there biome data?
+                DistributionData distro = null;
                 var biomeConfigs = BiomeResources.Where(
                         r => r.PlanetName == body.bodyName
                              && r.BiomeName == biomeName
-                             && r.ResourceName == resourceName
-                             && r.ResourceType == resourceType).ToList();
+                             && r.ResourceName == request.ResourceName
+                             && r.ResourceType == (int)request.ResourceType).ToList();
                 var planetConfigs =
                     PlanetaryResources.Where(
                         r => r.PlanetName == body.bodyName
-                             && r.ResourceName == resourceName
-                             && r.ResourceType == resourceType).ToList();
+                             && r.ResourceName == request.ResourceName
+                             && r.ResourceType == (int)request.ResourceType).ToList();
                 var globalConfigs =
                     GlobalResources.Where(
-                        r => r.ResourceName == resourceName
-                             && r.ResourceType == resourceType).ToList();
+                        r => r.ResourceName == request.ResourceName
+                             && r.ResourceType == (int)request.ResourceType).ToList();
                 //Extrapolate based on matching overrides
                 if (biomeConfigs.Any())
                 {
@@ -149,6 +162,7 @@ namespace Regolith.Common
                 {
                     return 0f;
                 }
+
                 var rand = new Random(seed);
                 //Our Simplex noise:
                 var noiseSeed = new int[8];
@@ -176,7 +190,7 @@ namespace Regolith.Common
                 var abundance = (rand.Next(min, max))/1000f;
 
                 //Applies to all but interplanetary
-                if (resourceType <= 2)
+                if (request.ResourceType != HarvestTypes.Interplanetary)
                 {
                     //Lets add some noise...
                     float swing = abundance*(distro.Variance/100f);
@@ -187,13 +201,15 @@ namespace Regolith.Common
                         abundance = 0;
                 }
                 //Altitude band - only applies to atmospheric and interplanetary
-                if (resourceType >= 2 && distro.HasVariableAltitude())
+                if (
+                    (request.ResourceType == HarvestTypes.Atmospheric || request.ResourceType == HarvestTypes.Atmospheric) 
+                    && distro.HasVariableAltitude())
                 {
                     var rad = body.Radius;
                     var ideal = ((rad*distro.MinAltitude) + (rad*distro.MaxAltitude))/2;
                     //print("REGO: IDEAL = " + ideal);
                     var range = rand.Next((int)(rad * distro.MinRange), (int)(rad * distro.MaxRange));
-                    var diff = Math.Abs(ideal - altitude);
+                    var diff = Math.Abs(ideal - request.Altitude);
                     var rangePerc = diff / range;
                     var modifier = 1d - rangePerc;
                     abundance *= (float)modifier;
@@ -210,6 +226,21 @@ namespace Regolith.Common
             {
                 print("[REGO] - Error in - RegolithResourceMap_GetAbundance - " + e.Message);
                 return 0f;
+            }
+        }
+
+        private static string GetDefaultSituation(HarvestTypes type)
+        {
+            switch (type)
+            {
+                case HarvestTypes.Atmospheric:
+                    return Vessel.Situations.FLYING.ToString();
+                case HarvestTypes.Oceanic:
+                    return Vessel.Situations.SPLASHED.ToString();
+                case HarvestTypes.Planetary:
+                    return Vessel.Situations.LANDED.ToString();
+                default:
+                    return Vessel.Situations.ORBITING.ToString();
             }
         }
 
