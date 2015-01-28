@@ -21,11 +21,8 @@ namespace Regolith.Planetary
         [KSPField]
         public float MaxAbundanceAltitude = 500000000f;
 
-        [KSPField]
-        public float MinAbundanceAltitude = 0f;
-
         [KSPField] 
-        public bool RequiresUnlock = false;
+        public bool RequiresUnlock = true;
         
 
         public override void OnStart(StartState state)
@@ -70,10 +67,6 @@ namespace Regolith.Planetary
             if (Utilities.GetAltitude(vessel) > MaxAbundanceAltitude && !vessel.Landed && ScannerType == 0)
             {
                 abundanceDisplay = "Too high";
-            }
-            if (Utilities.GetAltitude(vessel) < MinAbundanceAltitude && !vessel.Landed && ScannerType == 0)
-            {
-                abundanceDisplay = "Too low";
             }
 
             else if (!vessel.Splashed && ScannerType == 1)
@@ -121,13 +114,14 @@ namespace Regolith.Planetary
                 {
                     Altitude = vessel.altitude,
                     BodyId = FlightGlobals.currentMainBody.flightGlobalsIndex,
-                    CheckForLock = true,
+                    CheckForLock = RequiresUnlock,
                     Latitude = vessel.latitude,
                     Longitude = vessel.longitude,
                     ResourceType = (HarvestTypes)ScannerType,
                     ResourceName = ResourceName
                 };
                 abundanceValue = RegolithResourceMap.GetAbundance(abRequest);
+                print(abundanceValue);
             }
         }
 

@@ -120,10 +120,16 @@ namespace Regolith.Common
                     biomeName = biome.name;
                 }
 
-                //Is the biome even locked?  If not, just return a negative one
-                //so the consuming application can act accordingly.
-                if (RegolithScenario.Instance.gameSettings.IsBiomeUnlocked(request.BodyId, biomeName))
-                    return -1;
+                if (request.CheckForLock)
+                {
+                    //Is the biome even locked?  If not, just return a negative one
+                    //so the consuming application can act accordingly.
+                    bool isUnlocked = RegolithScenario.Instance.gameSettings.IsBiomeUnlocked(request.BodyId, biomeName);
+                    if (!isUnlocked)
+                    {
+                        return -1;
+                    }
+                }
 
                 //We need to determine our data set for randomization.
                 //Is there biome data?
@@ -248,8 +254,8 @@ namespace Regolith.Common
         {
             //For precision, we'll be rounding.
             //This gives us 64K potential drill sites.
-            var adjLat = Utilities.Rad2Lat(latitude);
-            var adjLon = Utilities.Rad2Lon(longitude);
+            var adjLat = Utilities.Deg2Rad(latitude);
+            var adjLon = Utilities.Deg2Rad(longitude);
             var x = Math.Round(adjLat, 0);
             var y = Math.Round(adjLon, 0);
             return new Vector2((float)x,(float)y);

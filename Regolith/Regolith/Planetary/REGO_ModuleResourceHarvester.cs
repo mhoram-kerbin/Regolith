@@ -234,8 +234,8 @@ namespace Regolith.Common
                 // - the depletion rate
                 // - the current depletion level at this node
                 var flow = (float)Math.Min(1, result.TimeFactor / deltaTime);
-                var depNode = RegolithResourceMap.GetDepletionNode(FlightGlobals.ship_latitude,
-                    FlightGlobals.ship_longitude);
+                var depNode = RegolithResourceMap.GetDepletionNode(vessel.latitude,
+                    vessel.longitude);
                 float curDep =
                     RegolithScenario.Instance.gameSettings.GetDepletionNodeValue(vessel.mainBody.flightGlobalsIndex,
                         ResourceName, (int)depNode.x, (int)depNode.y);

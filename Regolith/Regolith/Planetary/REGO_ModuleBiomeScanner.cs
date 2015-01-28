@@ -5,45 +5,6 @@ using Regolith.Scenario;
 
 namespace Regolith.Common
 {
-    public class REGO_ModuleGPS : PartModule
-    {
-        [KSPField(guiActive = true, guiName = "Body", guiActiveEditor = false)]
-        public string body = "???";
-        [KSPField(guiActive = true, guiName = "Biome", guiActiveEditor = false)]
-        public string bioName = "???";
-        [KSPField(guiActive = true, guiName = "Lat", guiActiveEditor = false)]
-        public string lat = "???";
-        [KSPField(guiActive = true, guiName = "Lon", guiActiveEditor = false)]
-        public string lon = "???";
-
-        public override void OnUpdate()
-        {
-            try
-            {
-                var thisBody = FlightGlobals.currentMainBody;
-                var thisLat = Utilities.Rad2Lat(FlightGlobals.ship_latitude);
-                var thisLon = Utilities.Rad2Lon(FlightGlobals.ship_longitude);
-                var biome = Utilities.GetBiome(thisLat, thisLon, FlightGlobals.currentMainBody);
-
-                body = thisBody.bodyName;
-                lat = thisLat.ToString();
-                lon = thisLon.ToString();
-                if (biome != null)
-                {
-                    bioName = biome.name;
-                }
-                else
-                {
-                    bioName = vessel.situation.ToString();
-                }
-            }
-            catch (Exception)
-            {
-                print("[REGO] Error updating ModuleGPS");
-            }
-        }
-    }
-
     public class REGO_ModuleBiomeScanner : PartModule
     {
         [KSPEvent(guiName = "Run Analysis", guiActive = true, externalToEVAOnly = true, guiActiveEditor = true,
@@ -51,9 +12,9 @@ namespace Regolith.Common
         public
         void RunAnalysis()
         {
-            var thisBody = FlightGlobals.currentMainBody;
-            var thisLat = Utilities.Rad2Lat(FlightGlobals.ship_latitude);
-            var thisLon = Utilities.Rad2Lon(FlightGlobals.ship_longitude);
+            var thisBody = vessel.mainBody;
+            var thisLat = Utilities.Deg2Rad(vessel.latitude);
+            var thisLon = Utilities.Deg2Rad(vessel.longitude);
             var biome = Utilities.GetBiome(thisLat, thisLon, FlightGlobals.currentMainBody);
             var biomeName = vessel.situation.ToString();
             if (biome != null)
@@ -75,11 +36,25 @@ namespace Regolith.Common
             vessel.checkLanded();
             vessel.checkSplashed();
 
-            var isLanded = vessel.Landed || vessel.Splashed;
-
-            if (Events["RunAnalysis"].active != isLanded)
+            var isEnabled = vessel.Landed || vessel.Splashed;
+            if (isEnabled)
             {
-                Events["RunAnalysis"].active = isLanded;
+                var thisBody = vessel.mainBody;
+                var thisLat = Utilities.Deg2Rad(vessel.latitude);
+                var thisLon = Utilities.Deg2Rad(vessel.longitude);
+                var biome = Utilities.GetBiome(thisLat, thisLon, FlightGlobals.currentMainBody);
+                var biomeName = vessel.situation.ToString();
+                if (biome != null)
+                {
+                    biomeName = biome.name;
+                }
+                if(RegolithScenario.Instance.gameSettings.IsBiomeUnlocked(thisBody.flightGlobalsIndex, biomeName))
+                    isEnabled = false;
+            }
+
+            if (Events["RunAnalysis"].active != isEnabled)
+            {
+                Events["RunAnalysis"].active = isEnabled;
                 MonoUtilities.RefreshContextWindows(part);
             }
         }

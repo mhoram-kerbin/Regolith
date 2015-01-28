@@ -51,6 +51,7 @@
     <Compile Include="Common\NoiseGenerator.cs" />
     <Compile Include="Converters\MonoUtilities.cs" />
     <Compile Include="Planetary\AbundanceRequest.cs" />
+    <Compile Include="Planetary\REGO_ModuleGPS.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceScanner.cs" />
     <Compile Include="Planetary\REGO_ModuleResourceHarvester.cs" />
     <Compile Include="Converters\REGO_ModuleResourceConverter.cs" />
