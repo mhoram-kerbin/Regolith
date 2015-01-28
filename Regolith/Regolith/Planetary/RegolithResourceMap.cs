@@ -75,8 +75,7 @@ namespace Regolith.Common
         }
 
         [Obsolete("Keeping in for SCANSat compatibility, use an AbundanceRequest instead")]
-        public static float GetAbundance(double latitude, double longitude, string resourceName, int bodyId,
-            HarvestTypes resourceType = HarvestTypes.Planetary, double altitude = 0)
+        public static float GetAbundance(double latitude, double longitude, string resourceName, int bodyId)
         {
             var abRequest = new AbundanceRequest
                             {
@@ -84,9 +83,9 @@ namespace Regolith.Common
                                 Longitude = longitude,
                                 BodyId = bodyId,
                                 ResourceName = resourceName,
-                                ResourceType = resourceType,
-                                Altitude = altitude,
-                                CheckForLock = true
+                                ResourceType = HarvestTypes.Planetary,
+                                Altitude = 0,
+                                CheckForLock = true  //This means that biome unlocking is active
                             };
             return GetAbundance(abRequest);
         }
