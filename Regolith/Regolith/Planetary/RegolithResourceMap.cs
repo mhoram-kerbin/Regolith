@@ -183,7 +183,7 @@ namespace Regolith.Common
                     max = min + 1;
                 var abundance = (rand.Next(min, max))/1000f;
                 var baseAbuncance = abundance / 100f;
-                var minAbundance = Math.Max(0.01f,min/100f);
+                var minAbundance = Math.Max(0.01f,min)/100f;
 
                 //Applies to all but interplanetary
                 if (request.ResourceType != HarvestTypes.Interplanetary)
