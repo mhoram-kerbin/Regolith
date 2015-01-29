@@ -104,9 +104,11 @@ namespace Regolith.Common
                 }
             }
 
-            if (timeFactor < deltaTime)
+            if (timeFactor <= Utilities.FLOAT_TOLERANCE)
             {
                 result.Status = "Missing inputs";
+                result.TimeFactor = 0;
+                return result;
             }
 
 
@@ -124,9 +126,11 @@ namespace Regolith.Common
                 }
             }
 
-            if (timeFactor < deltaTime)
+            if (timeFactor <= Utilities.FLOAT_TOLERANCE)
             {
-                result.Status = "No space";
+                result.Status = "no space";
+                result.TimeFactor = 0;
+                return result;
             }
 
             //Pull inputs

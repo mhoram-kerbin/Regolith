@@ -75,7 +75,7 @@ namespace Regolith.Common
         }
 
         [Obsolete("Keeping in for SCANSat compatibility, use an AbundanceRequest instead")]
-        public static float GetAbundance(double latitude, double longitude, string resourceName, int bodyId, int resType, int altitude, bool checkForLock)
+        public static float GetAbundance(double latitude, double longitude, string resourceName, int bodyId, int resType, int altitude, bool checkForLock = true)
         {
             var abRequest = new AbundanceRequest
                             {
@@ -117,17 +117,6 @@ namespace Regolith.Common
                 if (biome != null)
                 {
                     biomeName = biome.name;
-                }
-
-                if (request.CheckForLock)
-                {
-                    //Is the biome even locked?  If not, just return a negative one
-                    //so the consuming application can act accordingly.
-                    bool isUnlocked = RegolithScenario.Instance.gameSettings.IsBiomeUnlocked(request.BodyId, biomeName);
-                    if (!isUnlocked)
-                    {
-                        return -1;
-                    }
                 }
 
                 //We need to determine our data set for randomization.
@@ -193,6 +182,8 @@ namespace Regolith.Common
                 if (min > max)
                     max = min + 1;
                 var abundance = (rand.Next(min, max))/1000f;
+                var baseAbuncance = abundance / 100f;
+                var minAbundance = Math.Max(0.01f,min/100f);
 
                 //Applies to all but interplanetary
                 if (request.ResourceType != HarvestTypes.Interplanetary)
@@ -224,8 +215,26 @@ namespace Regolith.Common
                 if (abundance <= Utilities.FLOAT_TOLERANCE)
                     return 0f;
 
-                //Return it as a float not a percent
-                return abundance / 100;
+
+                //Now for our return scenarios.
+                var trueAbundance = abundance / 100;
+
+
+                //Biome unlocked or no lock check
+                if (!request.CheckForLock || RegolithScenario.Instance.gameSettings.IsBiomeUnlocked(request.BodyId, biomeName))
+                {
+                    return trueAbundance;
+                }
+                //Planet unlocked
+                else if (RegolithScenario.Instance.gameSettings.IsPlanetUnlocked(request.BodyId))
+                {
+                    return baseAbuncance;
+                }
+                //Default is just our basic data
+                else
+                {
+                    return minAbundance;
+                }
             }
             catch (Exception e)
             {

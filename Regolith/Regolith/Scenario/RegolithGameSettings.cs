@@ -149,6 +149,11 @@ namespace Regolith.Scenario
             return BiomeLockInfo.Any(n => n.PlanetId == planetId && n.BiomeName == biomeName);
         }
 
+        public bool IsPlanetUnlocked(int planetId)
+        {
+            //Does a node exist?
+            return BiomeLockInfo.Any(n => n.PlanetId == planetId);
+        }
         public void UnlockBiome(int planetId, string biomeName)
         {
             if (IsBiomeUnlocked(planetId, biomeName))

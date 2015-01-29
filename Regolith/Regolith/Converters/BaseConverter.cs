@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FinePrint;
 using Regolith.Asteroids;
 using Regolith.Common;
 using UnityEngine;
@@ -71,6 +72,10 @@ namespace Regolith.Converters
             _converter = new ResourceConverter(_broker);
         }
 
+        public void SetEfficiencyBonus(float bonus)
+        {
+            EfficiencyBonus = bonus;
+        }
 
         public void EnableModule()
         {
@@ -138,19 +143,7 @@ namespace Regolith.Converters
             {
                 base.OnLoad(node);
                 lastUpdateTime = Utilities.GetValue(node, "lastUpdateTime", lastUpdateTime);
-                part.force_activate();
-                Events["StartResourceConverter"].guiName = StartActionName;
-                Events["StopResourceConverter"].guiName = StopActionName;
-                Actions["StartResourceConverterAction"].guiName = StartActionName;
-                Actions["StopResourceConverterAction"].guiName = StopActionName;
-                Fields["status"].guiName = ConverterName;
-                Fields["load"].guiName = ConverterName + " Load";
-                //Check for presence of an Animation Group.  If not present, enable the module.
-
-                if (!part.Modules.Contains("REGO_ModuleAnimationGroup"))
-                {
-                        EnableModule();
-                }
+                SetupModule();
             }
 
             catch (Exception e)
@@ -158,7 +151,41 @@ namespace Regolith.Converters
                 print("[REGO] - Error in - BaseConverter_OnLoad - " + e.Message); 
             }
         }
-        
+
+        private void SetupModule()
+        {
+            part.force_activate();
+            Events["StartResourceConverter"].guiName = StartActionName;
+            Events["StopResourceConverter"].guiName = StopActionName;
+            Actions["StartResourceConverterAction"].guiName = StartActionName;
+            Actions["StopResourceConverterAction"].guiName = StopActionName;
+            Fields["status"].guiName = ConverterName;
+            Fields["load"].guiName = ConverterName + " Load";
+            //Check for presence of an Animation Group.  If not present, enable the module.
+
+            if (!part.Modules.Contains("REGO_ModuleAnimationGroup"))
+            {
+                EnableModule();
+            }
+        }
+
+        public override void OnStart(StartState state)
+        {
+            if (vessel == null)
+                return;
+            try
+            {
+                base.OnStart(state);
+                SetupModule();
+            }
+
+            catch (Exception e)
+            {
+                print("[REGO] - Error in - BaseConverter_OnStart - " + e.Message);
+            }
+        }
+
+
         public override void OnSave(ConfigNode node)
         {
             base.OnSave(node);
