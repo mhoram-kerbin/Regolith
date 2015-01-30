@@ -121,7 +121,6 @@ namespace Regolith.Planetary
                     ResourceName = ResourceName
                 };
                 abundanceValue = RegolithResourceMap.GetAbundance(abRequest);
-                print(abundanceValue);
             }
         }
 
