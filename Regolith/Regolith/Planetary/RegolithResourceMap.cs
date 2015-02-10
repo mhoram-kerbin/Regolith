@@ -182,7 +182,7 @@ namespace Regolith.Common
                 if (min > max)
                     max = min + 1;
                 var abundance = (rand.Next(min, max))/1000f;
-                var baseAbuncance = abundance / 100f;
+                var baseAbuncance = abundance;
                 var minAbundance = Math.Max(0.01f,min)/1000f;
 
                 //Applies to all but interplanetary
@@ -198,7 +198,7 @@ namespace Regolith.Common
                 }
                 //Altitude band - only applies to atmospheric and interplanetary
                 if (
-                    (request.ResourceType == HarvestTypes.Atmospheric || request.ResourceType == HarvestTypes.Atmospheric) 
+                    (request.ResourceType == HarvestTypes.Atmospheric || request.ResourceType == HarvestTypes.Interplanetary) 
                     && distro.HasVariableAltitude())
                 {
                     var rad = body.Radius;
@@ -218,6 +218,9 @@ namespace Regolith.Common
 
                 //Now for our return scenarios.
                 var trueAbundance = abundance / 100;
+                baseAbuncance = baseAbuncance / 100;
+                minAbundance = minAbundance / 100;
+                
 
 
                 //Biome unlocked or no lock check
