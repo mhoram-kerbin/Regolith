@@ -141,9 +141,9 @@ namespace Regolith.Converters
                 return;
             try
             {
-                base.OnLoad(node);
                 lastUpdateTime = Utilities.GetValue(node, "lastUpdateTime", lastUpdateTime);
                 SetupModule();
+                base.OnLoad(node);
             }
 
             catch (Exception e)
@@ -174,8 +174,8 @@ namespace Regolith.Converters
                 return;
             try
             {
-                base.OnStart(state);
                 SetupModule();
+                base.OnStart(state);
             }
 
             catch (Exception e)
@@ -195,13 +195,15 @@ namespace Regolith.Converters
         {
             try
             {
+                //Check our time
+                var deltaTime = GetDeltaTime();
+                if (deltaTime < 0) 
+                    return;
+
                 //Handle state change
                 UpdateConverterStatus();
                 if (IsActivated)
                 {
-                    //Check our time
-                    var deltaTime = GetDeltaTime();
-                    if (deltaTime < 0) return;
                     var recipe = PrepareRecipe(deltaTime);
                     //To support trickle charging
                     if (recipe != null)
