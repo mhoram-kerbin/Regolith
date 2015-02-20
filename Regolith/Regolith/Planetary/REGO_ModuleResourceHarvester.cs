@@ -124,9 +124,14 @@ namespace Regolith.Common
 
                 if (HarvesterType == 0 && !vessel.Landed)
                 {
-                    status = "must land first";
-                    IsActivated = false;
-                    return null;
+                    //Let's do an altitude sanity check just in case
+                    var alt = vessel.GetHeightFromTerrain();
+                    if (alt > 500)
+                    {
+                        status = "must land first";
+                        IsActivated = false;
+                        return null;
+                    }
                 }
                 if (HarvesterType == 1 && !vessel.Splashed)
                 {
