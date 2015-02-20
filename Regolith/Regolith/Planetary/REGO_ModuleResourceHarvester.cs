@@ -119,6 +119,8 @@ namespace Regolith.Common
             {
                 if (!HighLogic.LoadedSceneIsFlight)
                     return null;
+                vessel.checkLanded();
+                vessel.checkSplashed();
 
                 if (HarvesterType == 0 && !vessel.Landed)
                 {
