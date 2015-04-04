@@ -147,6 +147,15 @@ namespace Regolith.Common
             }
         }
 
+		public static double fixLat(double lat)
+		{
+			return (lat + 180 + 90) % 180 - 90;
+		}
+
+		public static double fixLong(double lon)
+		{
+			return (lon + 360 + 180) % 360 - 180;
+		}
 
         public static double Deg2Rad(double degrees)
         {
