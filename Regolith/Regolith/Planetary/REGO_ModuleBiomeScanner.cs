@@ -13,8 +13,8 @@ namespace Regolith.Common
         void RunAnalysis()
         {
             var thisBody = vessel.mainBody;
-            var thisLat = Utilities.Deg2Rad(vessel.latitude);
-            var thisLon = Utilities.Deg2Rad(vessel.longitude);
+            var thisLat = Utilities.Deg2Rad(Utilities.fixLat(vessel.latitude));
+            var thisLon = Utilities.Deg2Rad(Utilities.fixLong(vessel.longitude));
             var biome = Utilities.GetBiome(thisLat, thisLon, FlightGlobals.currentMainBody);
             var biomeName = vessel.situation.ToString();
             if (biome != null)
@@ -40,8 +40,8 @@ namespace Regolith.Common
             if (isEnabled)
             {
                 var thisBody = vessel.mainBody;
-                var thisLat = Utilities.Deg2Rad(vessel.latitude);
-                var thisLon = Utilities.Deg2Rad(vessel.longitude);
+                var thisLat = Utilities.Deg2Rad(Utilities.fixLat(vessel.latitude));
+                var thisLon = Utilities.Deg2Rad(Utilities.fixLong(vessel.longitude));
                 var biome = Utilities.GetBiome(thisLat, thisLon, FlightGlobals.currentMainBody);
                 var biomeName = vessel.situation.ToString();
                 if (biome != null)
