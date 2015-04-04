@@ -18,13 +18,13 @@ namespace Regolith.Common
             try
             {
                 var thisBody = FlightGlobals.currentMainBody;
-                var thisLat = Utilities.Deg2Rad(vessel.latitude);
-                var thisLon = Utilities.Deg2Rad(vessel.longitude);
+                var thisLat = Utilities.Deg2Rad(Utilities.fixLat(vessel.latitude));
+                var thisLon = Utilities.Deg2Rad(Utilities.fixLong(vessel.longitude));
                 var biome = Utilities.GetBiome(thisLat, thisLon, FlightGlobals.currentMainBody);
 
                 body = thisBody.bodyName;
-                lat = String.Format("{0:0.000} [{1:0.000}N]", vessel.latitude, thisLat);
-                lon = String.Format("{0:0.000} [{1:0.000}E]", vessel.longitude, thisLon);
+                lat = String.Format("{0:0.000} [{1:0.000}N]", Utilities.fixLat(vessel.latitude), thisLat);
+                lon = String.Format("{0:0.000} [{1:0.000}E]", Utilities.fixLong(vessel.longitude), thisLon);
                 if (biome != null)
                 {
                     bioName = biome.name;
