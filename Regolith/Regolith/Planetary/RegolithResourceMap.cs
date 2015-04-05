@@ -108,8 +108,8 @@ namespace Regolith.Common
         {
             try
             {
-                var northing = Utilities.Deg2Rad(request.Latitude);
-                var easting = Utilities.Deg2Rad(request.Longitude);
+                var northing = Utilities.Deg2Rad(Utilities.fixLat(request.Latitude));
+                var easting = Utilities.Deg2Rad(Utilities.fixLong(request.Longitude));
                 var body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == request.BodyId);
                 var biome = Utilities.GetBiome(northing, easting, body);
                 var seed = GenerateAbundanceSeed(request, biome, body);
