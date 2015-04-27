@@ -46,38 +46,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Converters\BaseConverter.cs" />
-    <Compile Include="Asteroids\REGO_ModuleAnalysisResource.cs" />
-    <Compile Include="Common\NoiseGenerator.cs" />
-    <Compile Include="Converters\MonoUtilities.cs" />
-    <Compile Include="Planetary\AbundanceRequest.cs" />
-    <Compile Include="Planetary\REGO_ModuleGPS.cs" />
-    <Compile Include="Planetary\REGO_ModuleResourceScanner.cs" />
-    <Compile Include="Planetary\REGO_ModuleResourceHarvester.cs" />
-    <Compile Include="Converters\REGO_ModuleResourceConverter.cs" />
-    <Compile Include="Planetary\REGO_ModuleBiomeScanner.cs" />
-    <Compile Include="Planetary\RegolithResourceMap.cs" />
-    <Compile Include="Scenario\AddScenarioModules.cs" />
-    <Compile Include="Converters\ConversionRecipe.cs" />
-    <Compile Include="Common\DistributionData.cs" />
-    <Compile Include="Common\IAnimatedModule.cs" />
-    <Compile Include="Converters\IResourceBroker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenario\BiomeLockData.cs" />
-    <Compile Include="Scenario\DepletionData.cs" />
-    <Compile Include="Scenario\DepletionNode.cs" />
-    <Compile Include="Scenario\RegolithGameSettings.cs" />
-    <Compile Include="Scenario\RegolithScenario.cs" />
-    <Compile Include="Converters\ResourceBroker.cs" />
-    <Compile Include="Common\ResourceData.cs" />
-    <Compile Include="Converters\ResourceRatio.cs" />
-    <Compile Include="Common\REGO_ModuleAnimationGroup.cs" />
-    <Compile Include="Asteroids\REGO_ModuleAsteroidAnalysis.cs" />
-    <Compile Include="Asteroids\REGO_ModuleAsteroidDrill.cs" />
-    <Compile Include="Asteroids\REGO_ModuleAsteroidInfo.cs" />
-    <Compile Include="Asteroids\REGO_ModuleAsteroidResource.cs" />
-    <Compile Include="Converters\ResourceConverter.cs" />
-    <Compile Include="Common\Utilities.cs" />
+    <Compile Include="Regolith.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
