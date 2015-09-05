@@ -25,10 +25,25 @@ namespace Regolith.Common
         public ResourceConverter() : this(new ResourceBroker())
         { }
 
-        public ConverterResults ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part resPart, float efficiencyBonus)
+        public class ResourceTransferParameters
         {
-            var result = new ConverterResults();
-            result.Status = "Idle";
+            public class ResourceTransfer
+            {
+                public bool input;
+                public Part part;
+                public string resourceName;
+                public double amount;
+            }
+            public List<ResourceTransfer> rtl;
+            public double timeFactor;
+            public double bonus;
+        }
+        public ResourceTransferParameters GetTransferAmounts(double deltaTime, ConversionRecipe recipe, Part resPart, float efficiencyBonus)
+        {
+            ResourceTransferParameters rtp = new ResourceTransferParameters();
+            rtp.rtl = new List<ResourceTransferParameters.ResourceTransfer>();
+//            var result = new ConverterResults();
+//            result.Status = "Idle";
             //Efficiency bonus is comprised of two things.
             //The bonus passed in, and the presence of all required components.
             var bonus = 1d; //We start at 100%.
@@ -50,9 +65,10 @@ namespace Regolith.Common
             //It may be that we're at zero!
             if (bonus <= Utilities.FLOAT_TOLERANCE)
             {
-                result.Status = "Missing resources";
-                result.TimeFactor = 0;
-                return result;
+                throw new RecepieException("Missing resources");
+//                result.Status = "Missing resources";
+//                result.TimeFactor = 0;
+//                return result;
             }
 
             //We test for availability of all inputs
@@ -106,9 +122,10 @@ namespace Regolith.Common
 
             if (timeFactor <= Utilities.FLOAT_TOLERANCE)
             {
-                result.Status = "Missing inputs";
-                result.TimeFactor = 0;
-                return result;
+                throw new RecepieException("Missing inputs");
+//                result.Status = "Missing inputs";
+//                result.TimeFactor = 0;
+//                return result;
             }
 
 
@@ -128,40 +145,75 @@ namespace Regolith.Common
 
             if (timeFactor <= Utilities.FLOAT_TOLERANCE)
             {
-                result.Status = "no space";
-                result.TimeFactor = 0;
-                return result;
+                throw new RecepieException("no space");
+//                result.Status = "no space";
+//                result.TimeFactor = 0;
+//                return result;
             }
 
             //Pull inputs
             foreach (var res in recipe.Inputs)
             {
-                double input;
                 if (res.ResourceName == "ElectricCharge")
                 {
                     var ecWarp = TimeWarp.CurrentRate*Utilities.GetSecondsPerTick();
                     var avail = _broker.AmountAvailable(resPart, "ElectricCharge");
                     if (avail < ecWarp)
                         ecWarp = Utilities.GetMaxECDeltaTime();
-                    input = _broker.RequestResource(resPart, res.ResourceName,
-                        res.Ratio * bonus * Math.Min(timeFactor, ecWarp));
+                    rtp.rtl.Add(new ResourceTransferParameters.ResourceTransfer { amount = res.Ratio * bonus * Math.Min(timeFactor, ecWarp), input = true, part = resPart, resourceName = res.ResourceName });
                 }
                 else
                 {
-                    input = _broker.RequestResource(resPart, res.ResourceName, res.Ratio * timeFactor * bonus);
+                    rtp.rtl.Add(new ResourceTransferParameters.ResourceTransfer { amount = res.Ratio * timeFactor * bonus, input = true, part = resPart, resourceName = res.ResourceName });
                 }
             }
             
             //Store outputs
             foreach (var res in recipe.Outputs)
             {
+                rtp.rtl.Add(new ResourceTransferParameters.ResourceTransfer { amount = res.Ratio * timeFactor * bonus, input = false, part = resPart, resourceName = res.ResourceName });
+            }
+            rtp.bonus = bonus;
+            rtp.timeFactor = timeFactor;
+            return rtp;
+        }
 
-                var output = _broker.StoreResource(resPart, res.ResourceName, res.Ratio * timeFactor * bonus);
+        public ConverterResults ProcessRecipe(double deltaTime, ConversionRecipe recipe, Part resPart, float efficiencyBonus)
+        {
+            var result = new ConverterResults();
+            result.Status = "Idle";
+            ResourceTransferParameters rtp = new ResourceTransferParameters();
+            try {
+                rtp = GetTransferAmounts(deltaTime, recipe, resPart, efficiencyBonus);
+            }
+            catch (RecepieException e) {
+                result.Status = e.problem;
+                result.TimeFactor = 0;
+                return result;
+            }
+
+            foreach (ResourceTransferParameters.ResourceTransfer rt in rtp.rtl)
+            {
+                if (rt.input)
+                {
+                    _broker.RequestResource(rt.part, rt.resourceName,rt.amount);
+                }
+                else
+                {
+                    _broker.StoreResource(rt.part, rt.resourceName, rt.amount);
+                }
             }
 
             //Work in bonus so our efficiency value is correct.
-            result.TimeFactor = timeFactor * bonus;
+            result.TimeFactor = rtp.timeFactor * rtp.bonus;
             return result;
         }
+
+        private class RecepieException : Exception
+        {
+            public string problem;
+            public RecepieException(string p) { problem = p; }
+        }
+
     }
 }
